@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Habit Tracker â Jose Enrique</title>
+<title>Habit Tracker — Jose Enrique</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f0f;color:#f0f0f0;padding:0 0 40px}
@@ -98,9 +98,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <div class="section">
   <div class="header-name">Jose Enrique Sanz Peynado</div>
-  <div class="header-sub">Habit Tracker Â· <span id="today-date"></span></div>
+  <div class="header-sub">Habit Tracker · <span id="today-date"></span></div>
   <span class="pill pill-blue">Mounjaro inicio: 27 abr 2026</span>
-  <span class="pill pill-amber">PrÃ³xima dosis: 4 may 2026</span>
+  <span class="pill pill-amber">Próxima dosis: 4 may 2026</span>
 </div>
 
 <div class="nav-tabs">
@@ -112,17 +112,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <div id="page-hoy" class="page active">
   <div class="section">
-    <div class="sec-title">Agua â meta 4 Yetis (~3L / 100oz)</div>
+    <div class="sec-title">Agua — meta 4 Yetis (~3L / 100oz)</div>
     <div class="yeti-grid">
       <button class="yeti-btn" id="y0" onclick="toggleYeti(0)">Yeti 1</button>
       <button class="yeti-btn" id="y1" onclick="toggleYeti(1)">Yeti 2</button>
-      <button class="yeti-btn" id="y2" onclick="toggleYeti(2)">Yeti 3</button>
+    2 <button class="yeti-btn" id="y2" onclick="toggleYeti(2)">Yeti 3</button>
       <button class="yeti-btn" id="y3" onclick="toggleYeti(3)">Yeti 4</button>
     </div>
     <div class="water-label" id="water-label">0 / 4 Yetis</div>
   </div>
   <div class="section">
-    <div class="sec-title">Macros del dÃ­a</div>
+    <div class="sec-title">Macros del día</div>
     <div id="macros-container"></div>
     <button class="reset-btn" onclick="resetMacros()">Resetear macros</button>
   </div>
@@ -136,22 +136,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="log-sep" style="border-top:none;margin-top:0;padding-top:0">Entrenamiento (pesas)</div>
     <div class="log-form">
       <input type="date" id="train-date">
-      <input type="text" id="train-type" placeholder="Ej: DÃ­a A â Upper body">
-      <input type="text" id="train-dur" placeholder="DuraciÃ³n (opcional, ej: 45 min)">
+      <input type="text" id="train-type" placeholder="Ej: Día A — Upper body">
+      <input type="text" id="train-dur" placeholder="Duración (opcional, ej: 45 min)">
       <button onclick="addLog('train')">+ Agregar entrenamiento</button>
     </div>
     <div id="train-log"></div>
     <div class="log-sep">Deporte</div>
     <div class="log-form">
       <input type="date" id="sport-date">
-      <input type="text" id="sport-type" placeholder="Ej: FÃºtbol, nataciÃ³n, caminata">
-      <input type="text" id="sport-dur" placeholder="DuraciÃ³n (opcional)">
+      <input type="text" id="sport-type" placeholder="Ej: Fútbol, natación, caminata">
+      <input type="text" id="sport-dur" placeholder="Duración (opcional)">
       <button onclick="addLog('sport')">+ Agregar deporte</button>
     </div>
     <div id="sport-log"></div>
   </div>
   <div class="section">
-    <div class="sec-title">Registro de peso (lunes â dÃ­a de dosis)</div>
+    <div class="sec-title">Registro de peso (lunes — día de dosis)</div>
     <div class="weight-row">
       <input type="number" id="weight-input" placeholder="Peso" step="0.1">
       <select id="weight-unit"><option>lbs</option><option>kg</option></select>
@@ -163,11 +163,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <div id="page-ejercicio" class="page">
   <div class="section">
-    <div class="sec-title">Rutina â mancuernas 15 lbs Â· ~40-45 min</div>
+    <div class="sec-title">Rutina — mancuernas 15 lbs · ~40-45 min</div>
     <div class="day-tabs">
-      <button class="day-tab active" onclick="showEx('A',this)">DÃ­a A</button>
-      <button class="day-tab" onclick="showEx('B',this)">DÃ­a B</button>
-      <button class="day-tab" onclick="showEx('C',this)">DÃ­a C</button>
+      <button class="day-tab active" onclick="showEx('A',this)">Día A</button>
+      <button class="day-tab" onclick="showEx('B',this)">Día B</button>
+      <button class="day-tab" onclick="showEx('C',this)">Día C</button>
     </div>
     <div id="ex-A" class="ex-panel active"></div>
     <div id="ex-B" class="ex-panel"></div>
@@ -177,7 +177,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <div id="page-historial" class="page">
   <div class="section">
-    <div class="sec-title">Ver dÃ­a anterior</div>
+    <div class="sec-title">Ver día anterior</div>
     <div class="hist-date-row">
       <input type="date" id="hist-date">
       <button onclick="loadHistorial()">Ver</button>
@@ -197,75 +197,75 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <script>
 const TODAY=new Date().toISOString().split('T')[0];
 const MACROS=[
-  {key:'cal',name:'CalorÃ­as',max:1910,unit:'kcal',color:'#378ADD'},
-  {key:'pro',name:'ProteÃ­na',max:140,unit:'g',color:'#1D9E75'},
+  {key:'cal',name:'Calorías',max:1910,unit:'kcal',color:'#378ADD'},
+  {key:'pro',name:'Proteína',max:140,unit:'g',color:'#1D9E75'},
   {key:'carb',name:'Carbos',max:180,unit:'g',color:'#EF9F27'},
   {key:'fat',name:'Grasa',max:70,unit:'g',color:'#D4537E'}
 ];
 const SUPS=[
   {moment:'Ayunas (20-30 min antes del desayuno)',items:[
-    {key:'seed',name:'Seed DS-01',detail:'2 cÃ¡psulas Â· con agua Â· en ayunas'}
+    {key:'seed',name:'Seed DS-01',detail:'2 cápsulas · con agua · en ayunas'}
   ]},
   {moment:'Con desayuno',items:[
-    {key:'d3k2',name:'Vitamina D3+K2 5,000 UI',detail:'1 cÃ¡psula Â· con comida con grasa'},
-    {key:'om3a',name:'Omega-3 Triple Strength',detail:'2 cÃ¡psulas Â· dosis AM'},
-    {key:'ashA',name:'Ashwagandha OrgÃ¡nica',detail:'1 cÃ¡psula (700mg) Â· dosis AM'}
+    {key:'d3k2',name:'Vitamina D3+K2 5,000 UI',detail:'1 cápsula · con comida con grasa'},
+    {key:'om3a',name:'Omega-3 Triple Strength',detail:'2 cápsulas · dosis AM'},
+    {key:'ashA',name:'Ashwagandha Orgánica',detail:'1 cápsula (700mg) · dosis AM'}
   ]},
   {moment:'Con almuerzo',items:[
-    {key:'om3b',name:'Omega-3 Triple Strength',detail:'2 cÃ¡psulas Â· dosis PM'},
-    {key:'vitc',name:'Vitamina C',detail:'1 cÃ¡psula (1,000mg)'},
-    {key:'ashB',name:'Ashwagandha OrgÃ¡nica',detail:'1 cÃ¡psula (700mg) Â· dosis PM'}
+    {key:'om3b',name:'Omega-3 Triple Strength',detail:'2 cápsulas · dosis PM'},
+    {key:'vitc',name:'Vitamina C',detail:'1 cápsula (1,000mg)'},
+    {key:'ashB',name:'Ashwagandha Orgánica',detail:'1 cápsula (700mg) · dosis PM'}
   ]},
   {moment:'Con cena',items:[
-    {key:'zinc',name:'Zinc',detail:'1 cÃ¡psula (30mg)'},
-    {key:'ashC',name:'Ashwagandha OrgÃ¡nica',detail:'1 cÃ¡psula (700mg) Â· dosis nocturna'}
+    {key:'zinc',name:'Zinc',detail:'1 cápsula (30mg)'},
+    {key:'ashC',name:'Ashwagandha Orgánica',detail:'1 cápsula (700mg) · dosis nocturna'}
   ]},
   {moment:'Antes de dormir',items:[
-    {key:'mag',name:'Magnesio Glycinate',detail:'400mg Â· 30-60 min antes de acostarse'}
+    {key:'mag',name:'Magnesio Glycinate',detail:'400mg · 30-60 min antes de acostarse'}
   ]}
 ];
 const ALL_SUPS=SUPS.flatMap(s=>s.items);
 const EXERCISES={
   A:[
-    {name:'Calentamiento: arm circles + jumping jacks',detail:'5 min Â· movilidad hombros, elevar FC',badge:'calentamiento'},
-    {name:'Press de pecho (en el piso)',detail:'4 Ã 10-12 reps Â· descanso 60 seg',badge:'pecho'},
-    {name:'Remo con mancuerna (un brazo)',detail:'4 Ã 10-12 reps c/lado Â· descanso 60 seg',badge:'espalda'},
-    {name:'Press de hombros sentado',detail:'3 Ã 10 reps Â· descanso 60 seg',badge:'hombros'},
-    {name:'Curl de bÃ­ceps alternado',detail:'3 Ã 12 reps c/lado Â· descanso 45 seg',badge:'bÃ­ceps'},
-    {name:'ExtensiÃ³n de trÃ­ceps sobre la cabeza',detail:'3 Ã 12 reps Â· descanso 45 seg',badge:'trÃ­ceps'},
-    {name:'Plancha',detail:'3 Ã 30-45 seg',badge:'core'},
-    {name:'Crunch bicicleta',detail:'3 Ã 20 reps Â· controlado',badge:'core'}
+    {name:'Calentamiento: arm circles + jumping jacks',detail:'5 min · movilidad hombros, elevar FC',badge:'calentamiento'},
+    {name:'Press de pecho (en el piso)',detail:'4 × 10-12 reps · descanso 60 seg',badge:'pecho'},
+    {name:'Remo con mancuerna (un brazo)',detail:'4 × 10-12 reps c/lado · descanso 60 seg',badge:'espalda'},
+    {name:'Press de hombros sentado',detail:'3 × 10 reps · descanso 60 seg',badge:'hombros'},
+    {name:'Curl de bíceps alternado',detail:'3 × 12 reps c/lado · descanso 45 seg',badge:'bíceps'},
+    {name:'Extensión de tríceps sobre la cabeza',detail:'3 × 12 reps · descanso 45 seg',badge:'tríceps'},
+    {name:'Plancha',detail:'3 × 30-45 seg',badge:'core'},
+    {name:'Crunch bicicleta',detail:'3 × 20 reps · controlado',badge:'core'}
   ],
   B:[
     {name:'Calentamiento: sentadilla sin peso + hip circles',detail:'5 min',badge:'calentamiento'},
-    {name:'Goblet squat (mancuerna al pecho)',detail:'4 Ã 12 reps Â· descanso 60 seg',badge:'cuÃ¡driceps / glÃºteos'},
-    {name:'Estocadas alternas con mancuernas',detail:'3 Ã 10 reps c/pierna Â· descanso 60 seg',badge:'cuÃ¡driceps / glÃºteos'},
-    {name:'Romanian deadlift',detail:'4 Ã 10 reps Â· espalda recta Â· descanso 60 seg',badge:'isquiotibiales / glÃºteos'},
-    {name:'Hip thrust con mancuerna',detail:'3 Ã 15 reps Â· descanso 45 seg',badge:'glÃºteos'},
-    {name:'Calf raises con mancuernas',detail:'3 Ã 20 reps Â· lento y controlado',badge:'pantorrillas'},
-    {name:'Dead bug',detail:'3 Ã 10 reps c/lado',badge:'core'},
-    {name:'Plancha lateral',detail:'2 Ã 25 seg c/lado',badge:'core'}
+    {name:'Goblet squat (mancuerna al pecho)',detail:'4 × 12 reps · descanso 60 seg',badge:'cuádriceps / glúteos'},
+    {name:'Estocadas alternas con mancuernas',detail:'3 × 10 reps c/pierna · descanso 60 seg',badge:'cuádriceps / glúteos'},
+    {name:'Romanian deadlift',detail:'4 × 10 reps · espalda recta · descanso 60 seg',badge:'isquiotibiales / glúteos'},
+    {name:'Hip thrust con mancuerna',detail:'3 × 15 reps · descanso 45 seg',badge:'glúteos'},
+    {name:'Calf raises con mancuernas',detail:'3 × 20 reps · lento y controlado',badge:'pantorrillas'},
+    {name:'Dead bug',detail:'3 × 10 reps c/lado',badge:'core'},
+    {name:'Plancha lateral',detail:'2 × 25 seg c/lado',badge:'core'}
   ],
   C:[
-    {name:'Circuito full body â 3 rondas',detail:'Descanso 90 seg entre rondas',badge:'circuito'},
+    {name:'Circuito full body — 3 rondas',detail:'Descanso 90 seg entre rondas',badge:'circuito'},
     {name:'Goblet squat',detail:'12 reps',badge:'full body'},
     {name:'Remo con mancuerna',detail:'10 reps c/lado',badge:'full body'},
     {name:'Press de hombros de pie',detail:'10 reps',badge:'full body'},
     {name:'Romanian deadlift',detail:'12 reps',badge:'full body'},
-    {name:'Curl + press',detail:'10 reps Â· curl de bÃ­ceps + press directo',badge:'full body'},
+    {name:'Curl + press',detail:'10 reps · curl de bíceps + press directo',badge:'full body'},
     {name:'Plancha',detail:'30 seg',badge:'core'}
   ]
 };
 const MJ_WEEKS=[
-  {dose:'2.5mg â Semana 1',date:'27 abr â 3 may 2026',tag:'actual',amber:false},
-  {dose:'2.5mg â Semana 2',date:'4 may â 10 may 2026',tag:'',amber:false},
-  {dose:'2.5mg â Semana 3',date:'11 may â 17 may 2026',tag:'',amber:false},
-  {dose:'2.5mg â Semana 4',date:'18 may â 24 may 2026',tag:'',amber:false},
-  {dose:'5mg â Semana 5',date:'25 may â 31 may 2026',tag:'subida',amber:true},
-  {dose:'5mg â Semana 6',date:'1 jun â 7 jun 2026',tag:'',amber:false},
-  {dose:'5mg â Semana 7',date:'8 jun â 14 jun 2026',tag:'',amber:false},
-  {dose:'5mg â Semana 8',date:'15 jun â 21 jun 2026',tag:'',amber:false},
-  {dose:'7.5mg â Semana 9',date:'22 jun en adelante',tag:'posible subida',amber:true}
+  {dose:'2.5mg — Semana 1',date:'27 abr – 3 may 2026',tag:'actual',amber:false},
+  {dose:'2.5mg — Semana 2',date:'4 may – 10 may 2026',tag:'',amber:false},
+  {dose:'2.5mg — Semana 3',date:'11 may – 17 may 2026',tag:'',amber:false},
+  {dose:'2.5mg — Semana 4',date:'18 may – 24 may 2026',tag:'',amber:false},
+  {dose:'5mg — Semana 5',date:'25 may – 31 may 2026',tag:'subida',amber:true},
+  {dose:'5mg — Semana 6',date:'1 jun – 7 jun 2026',tag:'',amber:false},
+  {dose:'5mg — Semana 7',date:'8 jun – 14 jun 2026',tag:'',amber:false},
+  {dose:'5mg — Semana 8',date:'15 jun – 21 jun 2026',tag:'',amber:false},
+  {dose:'7.5mg — Semana 9',date:'22 jun en adelante',tag:'posible subida',amber:true}
 ];
 function lsGet(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){return null}}
 function lsSave(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
@@ -284,7 +284,7 @@ function initWater(){
 }
 function updateWaterLabel(d){
   const c=d.filter(Boolean).length;
-  document.getElementById('water-label').textContent=c+' / 4 Yetis'+(c===4?' â Meta alcanzada!':'');
+  document.getElementById('water-label').textContent=c+' / 4 Yetis'+(c===4?' — Meta alcanzada!':'');
 }
 function toggleYeti(i){
   const d=lsGet('water_'+TODAY)||[false,false,false,false];
@@ -378,12 +378,12 @@ function showEx(day,btn){
 function renderLog(type){
   const d=lsGet('log_'+type)||[];
   const c=document.getElementById(type+'-log');
-  if(!d.length){c.innerHTML='<div class="empty-log">Sin entradas aÃºn</div>';return}
+  if(!d.length){c.innerHTML='<div class="empty-log">Sin entradas aún</div>';return}
   c.innerHTML=d.slice().reverse().slice(0,10).map((e,ri)=>{
     const realIdx=d.length-1-ri;
     return `<div class="log-entry">
       <div class="log-entry-left">${e.type}</div>
-      <div class="log-entry-right">${e.date}${e.dur?' Â· '+e.dur:''}<button class="log-del" onclick="delLog('${type}',${realIdx})">x</button></div>
+      <div class="log-entry-right">${e.date}${e.dur?' · '+e.dur:''}<button class="log-del" onclick="delLog('${type}',${realIdx})">x</button></div>
     </div>`;
   }).join('');
 }
@@ -408,7 +408,7 @@ function delLog(type,idx){
 function renderWeightLog(){
   const d=lsGet('weight_log')||[];
   const c=document.getElementById('weight-log');
-  if(!d.length){c.innerHTML='<div class="empty-log">Sin registros aÃºn</div>';return}
+  if(!d.length){c.innerHTML='<div class="empty-log">Sin registros aún</div>';return}
   c.innerHTML=d.slice().reverse().slice(0,12).map(e=>`<div class="weight-entry">
     <span style="color:#e0e0e0;font-weight:500">${e.val} ${e.unit}</span>
     <span style="color:#888">${e.date}</span>
@@ -432,13 +432,13 @@ function loadHistorial(){
   const water=lsGet('water_'+date)||[false,false,false,false];
   const wc=water.filter(Boolean).length;
   html+=`<div class="hist-section"><div class="hist-section-title">Agua</div>
-    <div class="hist-row"><span class="hist-label">Yetis tomados</span><span class="hist-val">${wc} / 4${wc===4?' Â· Meta alcanzada':''}</span></div>
+    <div class="hist-row"><span class="hist-label">Yetis tomados</span><span class="hist-val">${wc} / 4${wc===4?' · Meta alcanzada':''}</span></div>
   </div>`;
   const macros=lsGet('macros_'+date)||{};
   const hasMacros=MACROS.some(m=>macros[m.key]>0);
   html+=`<div class="hist-section"><div class="hist-section-title">Macros</div>`;
   if(!hasMacros){html+='<div class="hist-empty">Sin macros registrados</div>';}
-  else{MACROS.forEach(m=>{const val=macros[m.key]||0;const pct=Math.min(100,Math.round(val/m.max*100));html+=`<div class="hist-row"><span class="hist-label">${m.name}</span><span class="hist-val">${Math.round(val)} / ${m.max} ${m.unit} (${pct}%)</span></div>`;});}
+  else{MACQOS.forEach(m=>{const val=macros[m.key]||0;const pct=Math.min(100,Math.round(val/m.max*100));html+=`<div class="hist-row"><span class="hist-label">${m.name}</span><span class="hist-val">${Math.round(val)} / ${m.max} ${m.unit} (${pct}%)</span></div>`;});}
   html+='</div>';
   const sups=lsGet('sups_'+date)||{};
   const checkedCount=ALL_SUPS.filter(s=>sups[s.key]).length;
@@ -449,13 +449,13 @@ function loadHistorial(){
   const trainDay=trainLog.filter(e=>e.date===date);
   html+=`<div class="hist-section"><div class="hist-section-title">Entrenamiento</div>`;
   if(!trainDay.length){html+='<div class="hist-empty">Sin entrenamiento registrado</div>';}
-  else{html+=trainDay.map(e=>`<div class="hist-row"><span class="hist-label">${e.type}</span><span class="hist-val">${e.dur||'â'}</span></div>`).join('');}
+  else{html+=trainDay.map(e=>`<div class="hist-row"><span class="hist-label">${e.type}</span><span class="hist-val">${e.dur||'—'}</span></div>`).join('');}
   html+='</div>';
   const sportLog=lsGet('log_sport')||[];
   const sportDay=sportLog.filter(e=>e.date===date);
   html+=`<div class="hist-section"><div class="hist-section-title">Deporte</div>`;
   if(!sportDay.length){html+='<div class="hist-empty">Sin deporte registrado</div>';}
-  else{html+=sportDay.map(e=>`<div class="hist-row"><span class="hist-label">${e.type}</span><span class="hist-val">${e.dur||'â'}</span></div>`).join('');}
+  else{html+=sportDay.map(e=>`<div class="hist-row"><span class="hist-label">${e.type}</span><span class="hist-val">${e.dur||'—'}</span></div>`).join('');}
   html+='</div>';
   const weightLog=lsGet('weight_log')||[];
   const weightDay=weightLog.filter(e=>e.date===date);
