@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Habit Tracker â Jose Enrique</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f0f;color:#f0f0f0;padding:0 0 40px}
+.app{max-width:480px;margin:0 auto;padding:16px}
+.section{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:16px 18px;margin-bottom:14px}
+.sec-title{font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#666;margin-bottom:14px}
+.header-name{font-size:20px;font-weight:600;color:#f0f0f0;margin-bottom:3px}
+.header-sub{font-size:13px;color:#888}
+.pill{display:inline-block;font-size:11px;padding:4px 11px;border-radius:20px;margin-top:8px;margin-right:5px;font-weight:500}
+.pill-blue{background:#1a3a5c;color:#78b4f0}
+.pill-amber{background:#3a2a0a;color:#f0a830}
+.nav-tabs{display:flex;gap:6px;margin-bottom:16px;background:#111;padding:6px;border-radius:14px}
+.nav-tab{flex:1;padding:10px 4px;border-radius:10px;border:none;background:transparent;color:#666;font-size:12px;font-weight:600;cursor:pointer;text-align:center;-webkit-tap-highlight-color:transparent;transition:all 0.15s}
+.nav-tab.active{background:#1a1a1a;color:#f0f0f0}
+.page{display:none}
+.page.active{display:block}
+.yeti-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.yeti-btn{padding:16px 8px;border-radius:12px;border:1px solid #2a2a2a;background:#222;color:#888;font-size:14px;font-weight:600;cursor:pointer;text-align:center;transition:all 0.15s;-webkit-tap-highlight-color:transparent;width:100%}
+.yeti-btn.done{background:#1a3a5c;color:#78b4f0;border-color:#1a3a5c}
+.water-label{font-size:13px;color:#888;text-align:center;margin-top:4px}
+.macro-row{margin-bottom:14px}
+.macro-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.macro-name{font-size:13px;font-weight:600;color:#e0e0e0}
+.macro-nums{font-size:12px;color:#888}
+.macro-bar-bg{height:6px;background:#2a2a2a;border-radius:3px;overflow:hidden;margin-bottom:6px}
+.macro-bar-fill{height:100%;border-radius:3px;transition:width 0.3s}
+.macro-input-row{display:flex;gap:8px;align-items:center}
+.macro-input-row input{flex:1;font-size:15px;padding:9px 12px;border-radius:10px;border:1px solid #2a2a2a;background:#222;color:#f0f0f0;-webkit-appearance:none}
+.macro-input-row span{font-size:12px;color:#666;min-width:48px}
+.sup-moment{margin-bottom:16px}
+.sup-moment-label{font-size:12px;font-weight:600;color:#888;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #222}
+.sup-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #1f1f1f}
+.sup-item:last-child{border-bottom:none}
+.sup-check{width:20px;height:20px;margin-top:2px;cursor:pointer;flex-shrink:0;accent-color:#378ADD}
+.sup-name{font-size:14px;font-weight:500;color:#e0e0e0}
+.sup-detail{font-size:11px;color:#666;margin-top:2px;line-height:1.4}
+.day-tabs{display:flex;gap:8px;margin-bottom:14px}
+.day-tab{flex:1;padding:10px 4px;border-radius:10px;border:1px solid #2a2a2a;background:#222;color:#888;font-size:13px;font-weight:600;cursor:pointer;text-align:center;-webkit-tap-highlight-color:transparent}
+.day-tab.active{background:#1a3a5c;color:#78b4f0;border-color:#1a3a5c}
+.ex-panel{display:none}
+.ex-panel.active{display:block}
+.ex-item{padding:10px 0;border-bottom:1px solid #1f1f1f}
+.ex-item:last-child{border-bottom:none}
+.ex-item-name{font-size:14px;font-weight:500;color:#e0e0e0}
+.ex-item-detail{font-size:12px;color:#888;margin-top:3px}
+.ex-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:8px;margin-top:4px;background:#222;color:#888;border:1px solid #2a2a2a}
+.log-form{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.log-form input,.log-form select{font-size:15px;padding:10px 12px;border-radius:10px;border:1px solid #2a2a2a;background:#222;color:#f0f0f0;width:100%;-webkit-appearance:none}
+.log-form button{padding:12px;border-radius:10px;border:1px solid #2a2a2a;background:#222;color:#e0e0e0;font-size:14px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.log-entry{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #1f1f1f;font-size:13px}
+.log-entry:last-child{border-bottom:none}
+.log-entry-left{color:#e0e0e0;font-weight:500;flex:1;margin-right:8px}
+.log-entry-right{color:#888;font-size:11px;text-align:right}
+.log-del{font-size:11px;color:#c0392b;cursor:pointer;margin-left:10px;padding:3px 8px;border-radius:6px;border:1px solid #2a2a2a;background:none;-webkit-tap-highlight-color:transparent}
+.weight-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.weight-row input{flex:1;font-size:15px;padding:10px 12px;border-radius:10px;border:1px solid #2a2a2a;background:#222;color:#f0f0f0;-webkit-appearance:none}
+.weight-row select{font-size:14px;padding:10px 8px;border-radius:10px;border:1px solid #2a2a2a;background:#222;color:#f0f0f0;width:70px;-webkit-appearance:none}
+.weight-row button{padding:10px 16px;border-radius:10px;border:1px solid #2a2a2a;background:#222;color:#e0e0e0;font-size:15px;font-weight:600;cursor:pointer}
+.weight-entry{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1f1f1f;font-size:13px}
+.weight-entry:last-child{border-bottom:none}
+.mj-week{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;border:1px solid #2a2a2a;background:#1a1a1a;margin-bottom:6px}
+.mj-week.current{background:#1a3a5c;border-color:#1a3a5c}
+.mj-dot{width:9px;height:9px;border-radius:50%;background:#333;flex-shrink:0}
+.mj-week.current .mj-dot{background:#78b4f0}
+.mj-dose{font-size:14px;font-weight:600;color:#e0e0e0}
+.mj-week.current .mj-dose{color:#78b4f0}
+.mj-date{font-size:11px;color:#888;margin-top:2px}
+.mj-week.current .mj-date{color:#5090c0}
+.mj-tag{font-size:10px;padding:3px 9px;border-radius:8px;background:#0a2a3a;color:#78b4f0;font-weight:500;white-space:nowrap}
+.mj-tag.amber{background:#2a1a00;color:#f0a830}
+.empty-log{font-size:12px;color:#555;text-align:center;padding:14px 0}
+.reset-btn{font-size:11px;color:#555;cursor:pointer;text-decoration:underline;background:none;border:none;padding:6px 0;margin-top:4px}
+.log-sep{font-size:12px;font-weight:600;color:#888;margin:16px 0 10px;padding-top:14px;border-top:1px solid #222}
+.hist-date-row{display:flex;gap:8px;align-items:center;margin-bottom:16px}
+.hist-date-row input{flex:1;font-size:15px;padding:10px 12px;border-radius:10px;border:1px solid #2a2a2a;background:#222;color:#f0f0f0;-webkit-appearance:none}
+.hist-date-row button{padding:10px 16px;border-radius:10px;border:none;background:#1a3a5c;color:#78b4f0;font-size:14px;font-weight:600;cursor:pointer}
+.hist-section{margin-bottom:18px}
+.hist-section-title{font-size:10px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#555;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #222}
+.hist-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #1f1f1f;font-size:13px}
+.hist-row:last-child{border-bottom:none}
+.hist-label{color:#888}
+.hist-val{color:#e0e0e0;font-weight:500;text-align:right;max-width:60%}
+.hist-check{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #1f1f1f;font-size:13px}
+.hist-check:last-child{border-bottom:none}
+.hist-dot{width:8px;height:8px;border-radius:50%;background:#2a2a2a;flex-shrink:0}
+.hist-dot.checked{background:#1D9E75}
+.hist-empty{font-size:12px;color:#555;padding:10px 0}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="section">
+  <div class="header-name">Jose Enrique Sanz Peynado</div>
+  <div class="header-sub">Habit Tracker Â· <span id="today-date"></span></div>
+  <span class="pill pill-blue">Mounjaro inicio: 27 abr 2026</span>
+  <span class="pill pill-amber">PrÃ³xima dosis: 4 may 2026</span>
+</div>
+
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="showPage('hoy',this)">Hoy</button>
+  <button class="nav-tab" onclick="showPage('ejercicio',this)">Ejercicio</button>
+  <button class="nav-tab" onclick="showPage('historial',this)">Historial</button>
+  <button class="nav-tab" onclick="showPage('mounjaro',this)">Mounjaro</button>
+</div>
+
+<div id="page-hoy" class="page active">
+  <div class="section">
+    <div class="sec-title">Agua â meta 4 Yetis (~3L / 100oz)</div>
+    <div class="yeti-grid">
+      <button class="yeti-btn" id="y0" onclick="toggleYeti(0)">Yeti 1</button>
+      <button class="yeti-btn" id="y1" onclick="toggleYeti(1)">Yeti 2</button>
+      <button class="yeti-btn" id="y2" onclick="toggleYeti(2)">Yeti 3</button>
+      <button class="yeti-btn" id="y3" onclick="toggleYeti(3)">Yeti 4</button>
+    </div>
+    <div class="water-label" id="water-label">0 / 4 Yetis</div>
+  </div>
+  <div class="section">
+    <div class="sec-title">Macros del dÃ­a</div>
+    <div id="macros-container"></div>
+    <button class="reset-btn" onclick="resetMacros()">Resetear macros</button>
+  </div>
+  <div class="section">
+    <div class="sec-title">Suplementos</div>
+    <div id="sups-container"></div>
+    <button class="reset-btn" onclick="resetSups()">Resetear suplementos</button>
+  </div>
+  <div class="section">
+    <div class="sec-title">Log de actividad</div>
+    <div class="log-sep" style="border-top:none;margin-top:0;padding-top:0">Entrenamiento (pesas)</div>
+    <div class="log-form">
+      <input type="date" id="train-date">
+      <input type="text" id="train-type" placeholder="Ej: DÃ­a A â Upper body">
+      <input type="text" id="train-dur" placeholder="DuraciÃ³n (opcional, ej: 45 min)">
+      <button onclick="addLog('train')">+ Agregar entrenamiento</button>
+    </div>
+    <div id="train-log"></div>
+    <div class="log-sep">Deporte</div>
+    <div class="log-form">
+      <input type="date" id="sport-date">
+      <input type="text" id="sport-type" placeholder="Ej: FÃºtbol, nataciÃ³n, caminata">
+      <input type="text" id="sport-dur" placeholder="DuraciÃ³n (opcional)">
+      <button onclick="addLog('sport')">+ Agregar deporte</button>
+    </div>
+    <div id="sport-log"></div>
+  </div>
+  <div class="section">
+    <div class="sec-title">Registro de peso (lunes â dÃ­a de dosis)</div>
+    <div class="weight-row">
+      <input type="number" id="weight-input" placeholder="Peso" step="0.1">
+      <select id="weight-unit"><option>lbs</option><option>kg</option></select>
+      <button onclick="addWeight()">+</button>
+    </div>
+    <div id="weight-log"></div>
+  </div>
+</div>
+
+<div id="page-ejercicio" class="page">
+  <div class="section">
+    <div class="sec-title">Rutina â mancuernas 15 lbs Â· ~40-45 min</div>
+    <div class="day-tabs">
+      <button class="day-tab active" onclick="showEx('A',this)">DÃ­a A</button>
+      <button class="day-tab" onclick="showEx('B',this)">DÃ­a B</button>
+      <button class="day-tab" onclick="showEx('C',this)">DÃ­a C</button>
+    </div>
+    <div id="ex-A" class="ex-panel active"></div>
+    <div id="ex-B" class="ex-panel"></div>
+    <div id="ex-C" class="ex-panel"></div>
+  </div>
+</div>
+
+<div id="page-historial" class="page">
+  <div class="section">
+    <div class="sec-title">Ver dÃ­a anterior</div>
+    <div class="hist-date-row">
+      <input type="date" id="hist-date">
+      <button onclick="loadHistorial()">Ver</button>
+    </div>
+    <div id="hist-content"><div class="empty-log">Selecciona una fecha y presiona Ver</div></div>
+  </div>
+</div>
+
+<div id="page-mounjaro" class="page">
+  <div class="section">
+    <div class="sec-title">Timeline Mounjaro</div>
+    <div id="mj-timeline"></div>
+  </div>
+</div>
+
+</div>
+<script>
+const TODAY=new Date().toISOString().split('T')[0];
+const MACROS=[
+  {key:'cal',name:'CalorÃ­as',max:1910,unit:'kcal',color:'#378ADD'},
+  {key:'pro',name:'ProteÃ­na',max:140,unit:'g',color:'#1D9E75'},
+  {key:'carb',name:'Carbos',max:180,unit:'g',color:'#EF9F27'},
+  {key:'fat',name:'Grasa',max:70,unit:'g',color:'#D4537E'}
+];
+const SUPS=[
+  {moment:'Ayunas (20-30 min antes del desayuno)',items:[
+    {key:'seed',name:'Seed DS-01',detail:'2 cÃ¡psulas Â· con agua Â· en ayunas'}
+  ]},
+  {moment:'Con desayuno',items:[
+    {key:'d3k2',name:'Vitamina D3+K2 5,000 UI',detail:'1 cÃ¡psula Â· con comida con grasa'},
+    {key:'om3a',name:'Omega-3 Triple Strength',detail:'2 cÃ¡psulas Â· dosis AM'},
+    {key:'ashA',name:'Ashwagandha OrgÃ¡nica',detail:'1 cÃ¡psula (700mg) Â· dosis AM'}
+  ]},
+  {moment:'Con almuerzo',items:[
+    {key:'om3b',name:'Omega-3 Triple Strength',detail:'2 cÃ¡psulas Â· dosis PM'},
+    {key:'vitc',name:'Vitamina C',detail:'1 cÃ¡psula (1,000mg)'},
+    {key:'ashB',name:'Ashwagandha OrgÃ¡nica',detail:'1 cÃ¡psula (700mg) Â· dosis PM'}
+  ]},
+  {moment:'Con cena',items:[
+    {key:'zinc',name:'Zinc',detail:'1 cÃ¡psula (30mg)'},
+    {key:'ashC',name:'Ashwagandha OrgÃ¡nica',detail:'1 cÃ¡psula (700mg) Â· dosis nocturna'}
+  ]},
+  {moment:'Antes de dormir',items:[
+    {key:'mag',name:'Magnesio Glycinate',detail:'400mg Â· 30-60 min antes de acostarse'}
+  ]}
+];
+const ALL_SUPS=SUPS.flatMap(s=>s.items);
+const EXERCISES={
+  A:[
+    {name:'Calentamiento: arm circles + jumping jacks',detail:'5 min Â· movilidad hombros, elevar FC',badge:'calentamiento'},
+    {name:'Press de pecho (en el piso)',detail:'4 Ã 10-12 reps Â· descanso 60 seg',badge:'pecho'},
+    {name:'Remo con mancuerna (un brazo)',detail:'4 Ã 10-12 reps c/lado Â· descanso 60 seg',badge:'espalda'},
+    {name:'Press de hombros sentado',detail:'3 Ã 10 reps Â· descanso 60 seg',badge:'hombros'},
+    {name:'Curl de bÃ­ceps alternado',detail:'3 Ã 12 reps c/lado Â· descanso 45 seg',badge:'bÃ­ceps'},
+    {name:'ExtensiÃ³n de trÃ­ceps sobre la cabeza',detail:'3 Ã 12 reps Â· descanso 45 seg',badge:'trÃ­ceps'},
+    {name:'Plancha',detail:'3 Ã 30-45 seg',badge:'core'},
+    {name:'Crunch bicicleta',detail:'3 Ã 20 reps Â· controlado',badge:'core'}
+  ],
+  B:[
+    {name:'Calentamiento: sentadilla sin peso + hip circles',detail:'5 min',badge:'calentamiento'},
+    {name:'Goblet squat (mancuerna al pecho)',detail:'4 Ã 12 reps Â· descanso 60 seg',badge:'cuÃ¡driceps / glÃºteos'},
+    {name:'Estocadas alternas con mancuernas',detail:'3 Ã 10 reps c/pierna Â· descanso 60 seg',badge:'cuÃ¡driceps / glÃºteos'},
+    {name:'Romanian deadlift',detail:'4 Ã 10 reps Â· espalda recta Â· descanso 60 seg',badge:'isquiotibiales / glÃºteos'},
+    {name:'Hip thrust con mancuerna',detail:'3 Ã 15 reps Â· descanso 45 seg',badge:'glÃºteos'},
+    {name:'Calf raises con mancuernas',detail:'3 Ã 20 reps Â· lento y controlado',badge:'pantorrillas'},
+    {name:'Dead bug',detail:'3 Ã 10 reps c/lado',badge:'core'},
+    {name:'Plancha lateral',detail:'2 Ã 25 seg c/lado',badge:'core'}
+  ],
+  C:[
+    {name:'Circuito full body â 3 rondas',detail:'Descanso 90 seg entre rondas',badge:'circuito'},
+    {name:'Goblet squat',detail:'12 reps',badge:'full body'},
+    {name:'Remo con mancuerna',detail:'10 reps c/lado',badge:'full body'},
+    {name:'Press de hombros de pie',detail:'10 reps',badge:'full body'},
+    {name:'Romanian deadlift',detail:'12 reps',badge:'full body'},
+    {name:'Curl + press',detail:'10 reps Â· curl de bÃ­ceps + press directo',badge:'full body'},
+    {name:'Plancha',detail:'30 seg',badge:'core'}
+  ]
+};
+const MJ_WEEKS=[
+  {dose:'2.5mg â Semana 1',date:'27 abr â 3 may 2026',tag:'actual',amber:false},
+  {dose:'2.5mg â Semana 2',date:'4 may â 10 may 2026',tag:'',amber:false},
+  {dose:'2.5mg â Semana 3',date:'11 may â 17 may 2026',tag:'',amber:false},
+  {dose:'2.5mg â Semana 4',date:'18 may â 24 may 2026',tag:'',amber:false},
+  {dose:'5mg â Semana 5',date:'25 may â 31 may 2026',tag:'subida',amber:true},
+  {dose:'5mg â Semana 6',date:'1 jun â 7 jun 2026',tag:'',amber:false},
+  {dose:'5mg â Semana 7',date:'8 jun â 14 jun 2026',tag:'',amber:false},
+  {dose:'5mg â Semana 8',date:'15 jun â 21 jun 2026',tag:'',amber:false},
+  {dose:'7.5mg â Semana 9',date:'22 jun en adelante',tag:'posible subida',amber:true}
+];
+function lsGet(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){return null}}
+function lsSave(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+document.getElementById('today-date').textContent=new Date().toLocaleDateString('es-DO',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+document.getElementById('hist-date').value=TODAY;
+function initWater(){
+  const d=lsGet('water_'+TODAY)||[false,false,false,false];
+  d.forEach((v,i)=>{if(v)document.getElementById('y'+i).classList.add('done')});
+  updateWaterLabel(d);
+}
+function updateWaterLabel(d){
+  const c=d.filter(Boolean).length;
+  document.getElementById('water-label').textContent=c+' / 4 Yetis'+(c===4?' â Meta alcanzada!':'');
+}
+function toggleYeti(i){
+  const d=lsGet('water_'+TODAY)||[false,false,false,false];
+  d[i]=!d[i];
+  document.getElementById('y'+i).classList.toggle('done',d[i]);
+  updateWaterLabel(d);
+  lsSave('water_'+TODAY,d);
+}
+function buildMacros(){
+  const c=document.getElementById('macros-container');
+  c.innerHTML='';
+  MACROS.forEach(m=>{
+    const div=document.createElement('div');
+    div.className='macro-row';
+    div.innerHTML=`<div class="macro-header"><span class="macro-name">${m.name}</span><span class="macro-nums" id="mnum-${m.key}">0 / ${m.max} ${m.unit}</span></div>
+    <div class="macro-bar-bg"><div class="macro-bar-fill" id="mbar-${m.key}" style="width:0%;background:${m.color}"></div></div>
+    <div class="macro-input-row"><input type="number" id="minp-${m.key}" placeholder="Consumido hoy" min="0" inputmode="numeric" oninput="updateMacro('${m.key}',${m.max},'${m.unit}')"><span>/ ${m.max} ${m.unit}</span></div>`;
+    c.appendChild(div);
+  });
+}
+function initMacros(){
+  buildMacros();
+  const d=lsGet('macros_'+TODAY)||{};
+  MACROS.forEach(m=>{
+    if(d[m.key]!==undefined){
+      document.getElementById('minp-'+m.key).value=d[m.key];
+      renderMacro(m.key,d[m.key],m.max,m.unit);
+    }
+  });
+}
+function renderMacro(key,val,max,unit){
+  const pct=Math.min(100,Math.round(val/max*100));
+  document.getElementById('mbar-'+key).style.width=pct+'%';
+  document.getElementById('mnum-'+key).textContent=Math.round(val)+' / '+max+' '+unit;
+}
+function updateMacro(key,max,unit){
+  const val=parseFloat(document.getElementById('minp-'+key).value)||0;
+  renderMacro(key,val,max,unit);
+  const d=lsGet('macros_'+TODAY)||{};
+  d[key]=val;
+  lsSave('macros_'+TODAY,d);
+}
+function resetMacros(){
+  lsSave('macros_'+TODAY,{});
+  MACROS.forEach(m=>{document.getElementById('minp-'+m.key).value='';renderMacro(m.key,0,m.max,m.unit)});
+}
+function buildSups(){
+  const c=document.getElementById('sups-container');
+  c.innerHTML='';
+  SUPS.forEach(s=>{
+    const wrap=document.createElement('div');
+    wrap.className='sup-moment';
+    wrap.innerHTML='<div class="sup-moment-label">'+s.moment+'</div>'+
+      s.items.map(i=>`<div class="sup-item">
+        <input type="checkbox" class="sup-check" id="sup-${i.key}" onchange="saveSup('${i.key}',this.checked)">
+        <div><div class="sup-name">${i.name}</div><div class="sup-detail">${i.detail}</div></div>
+      </div>`).join('');
+    c.appendChild(wrap);
+  });
+}
+function initSups(){
+  buildSups();
+  const d=lsGet('sups_'+TODAY)||{};
+  Object.keys(d).forEach(k=>{const el=document.getElementById('sup-'+k);if(el)el.checked=d[k]});
+}
+function saveSup(key,val){
+  const d=lsGet('sups_'+TODAY)||{};
+  d[key]=val;
+  lsSave('sups_'+TODAY,d);
+}
+function resetSups(){
+  lsSave('sups_'+TODAY,{});
+  document.querySelectorAll('.sup-check').forEach(el=>el.checked=false);
+}
+function buildExercises(){
+  ['A','B','C'].forEach(day=>{
+    const c=document.getElementById('ex-'+day);
+    c.innerHTML=EXERCISES[day].map(e=>`<div class="ex-item">
+      <div class="ex-item-name">${e.name}</div>
+      <div class="ex-item-detail">${e.detail}</div>
+      <span class="ex-badge">${e.badge}</span>
+    </div>`).join('');
+  });
+}
+function showEx(day,btn){
+  document.querySelectorAll('.ex-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.day-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('ex-'+day).classList.add('active');
+  btn.classList.add('active');
+}
+function renderLog(type){
+  const d=lsGet('log_'+type)||[];
+  const c=document.getElementById(type+'-log');
+  if(!d.length){c.innerHTML='<div class="empty-log">Sin entradas aÃºn</div>';return}
+  c.innerHTML=d.slice().reverse().slice(0,10).map((e,ri)=>{
+    const realIdx=d.length-1-ri;
+    return `<div class="log-entry">
+      <div class="log-entry-left">${e.type}</div>
+      <div class="log-entry-right">${e.date}${e.dur?' Â· '+e.dur:''}<button class="log-del" onclick="delLog('${type}',${realIdx})">x</button></div>
+    </div>`;
+  }).join('');
+}
+function addLog(type){
+  const date=document.getElementById(type+'-date').value||TODAY;
+  const t=document.getElementById(type+'-type').value.trim();
+  const dur=document.getElementById(type+'-dur').value.trim();
+  if(!t)return;
+  const d=lsGet('log_'+type)||[];
+  d.push({date,type:t,dur});
+  lsSave('log_'+type,d);
+  document.getElementById(type+'-type').value='';
+  document.getElementById(type+'-dur').value='';
+  renderLog(type);
+}
+function delLog(type,idx){
+  const d=lsGet('log_'+type)||[];
+  d.splice(idx,1);
+  lsSave('log_'+type,d);
+  renderLog(type);
+}
+function renderWeightLog(){
+  const d=lsGet('weight_log')||[];
+  const c=document.getElementById('weight-log');
+  if(!d.length){c.innerHTML='<div class="empty-log">Sin registros aÃºn</div>';return}
+  c.innerHTML=d.slice().reverse().slice(0,12).map(e=>`<div class="weight-entry">
+    <span style="color:#e0e0e0;font-weight:500">${e.val} ${e.unit}</span>
+    <span style="color:#888">${e.date}</span>
+  </div>`).join('');
+}
+function addWeight(){
+  const val=document.getElementById('weight-input').value;
+  const unit=document.getElementById('weight-unit').value;
+  if(!val)return;
+  const d=lsGet('weight_log')||[];
+  d.push({val:parseFloat(val).toFixed(1),unit,date:TODAY});
+  lsSave('weight_log',d);
+  document.getElementById('weight-input').value='';
+  renderWeightLog();
+}
+function loadHistorial(){
+  const date=document.getElementById('hist-date').value;
+  if(!date){return}
+  const c=document.getElementById('hist-content');
+  let html='';
+  const water=lsGet('water_'+date)||[false,false,false,false];
+  const wc=water.filter(Boolean).length;
+  html+=`<div class="hist-section"><div class="hist-section-title">Agua</div>
+    <div class="hist-row"><span class="hist-label">Yetis tomados</span><span class="hist-val">${wc} / 4${wc===4?' Â· Meta alcanzada':''}</span></div>
+  </div>`;
+  const macros=lsGet('macros_'+date)||{};
+  const hasMacros=MACROS.some(m=>macros[m.key]>0);
+  html+=`<div class="hist-section"><div class="hist-section-title">Macros</div>`;
+  if(!hasMacros){html+='<div class="hist-empty">Sin macros registrados</div>';}
+  else{MACROS.forEach(m=>{const val=macros[m.key]||0;const pct=Math.min(100,Math.round(val/m.max*100));html+=`<div class="hist-row"><span class="hist-label">${m.name}</span><span class="hist-val">${Math.round(val)} / ${m.max} ${m.unit} (${pct}%)</span></div>`;});}
+  html+='</div>';
+  const sups=lsGet('sups_'+date)||{};
+  const checkedCount=ALL_SUPS.filter(s=>sups[s.key]).length;
+  html+=`<div class="hist-section"><div class="hist-section-title">Suplementos (${checkedCount} / ${ALL_SUPS.length})</div>`;
+  html+=ALL_SUPS.map(s=>{const ok=!!sups[s.key];return`<div class="hist-check"><div class="hist-dot${ok?' checked':''}"></div><span style="color:${ok?'#e0e0e0':'#444'}">${s.name}</span></div>`;}).join('');
+  html+='</div>';
+  const trainLog=lsGet('log_train')||[];
+  const trainDay=trainLog.filter(e=>e.date===date);
+  html+=`<div class="hist-section"><div class="hist-section-title">Entrenamiento</div>`;
+  if(!trainDay.length){html+='<div class="hist-empty">Sin entrenamiento registrado</div>';}
+  else{html+=trainDay.map(e=>`<div class="hist-row"><span class="hist-label">${e.type}</span><span class="hist-val">${e.dur||'â'}</span></div>`).join('');}
+  html+='</div>';
+  const sportLog=lsGet('log_sport')||[];
+  const sportDay=sportLog.filter(e=>e.date===date);
+  html+=`<div class="hist-section"><div class="hist-section-title">Deporte</div>`;
+  if(!sportDay.length){html+='<div class="hist-empty">Sin deporte registrado</div>';}
+  else{html+=sportDay.map(e=>`<div class="hist-row"><span class="hist-label">${e.type}</span><span class="hist-val">${e.dur||'â'}</span></div>`).join('');}
+  html+='</div>';
+  const weightLog=lsGet('weight_log')||[];
+  const weightDay=weightLog.filter(e=>e.date===date);
+  html+=`<div class="hist-section"><div class="hist-section-title">Peso</div>`;
+  if(!weightDay.length){html+='<div class="hist-empty">Sin peso registrado</div>';}
+  else{html+=weightDay.map(e=>`<div class="hist-row"><span class="hist-label">Peso registrado</span><span class="hist-val">${e.val} ${e.unit}</span></div>`).join('');}
+  html+='</div>';
+  c.innerHTML=html;
+}
+function buildTimeline(){
+  const c=document.getElementById('mj-timeline');
+  c.innerHTML=MJ_WEEKS.map((w,i)=>{
+    const cls='mj-week'+(i===0?' current':'');
+    const tag=w.tag?`<span class="mj-tag${w.amber?' amber':''}">${w.tag}</span>`:'';
+    return`<div class="${cls}"><div class="mj-dot"></div><div style="flex:1"><div class="mj-dose">${w.dose}</div><div class="mj-date">${w.date}</div></div>${tag}</div>`;
+  }).join('');
+}
+function init(){
+  initWater();initMacros();initSups();buildExercises();
+  renderLog('train');renderLog('sport');renderWeightLog();buildTimeline();
+  document.getElementById('train-date').value=TODAY;
+  document.getElementById('sport-date').value=TODAY;
+}
+init();
+</script>
+</body>
+</html>
