@@ -116,7 +116,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="yeti-grid">
       <button class="yeti-btn" id="y0" onclick="toggleYeti(0)">Yeti 1</button>
       <button class="yeti-btn" id="y1" onclick="toggleYeti(1)">Yeti 2</button>
-    <button class="yeti-btn" id="y2" onclick="toggleYeti(2)">Yeti 3</button>
+      <button class="yeti-btn" id="y2" onclick="toggleYeti(2)">Yeti 3</button>
       <button class="yeti-btn" id="y3" onclick="toggleYeti(3)">Yeti 4</button>
     </div>
     <div class="water-label" id="water-label">0 / 4 Yetis</div>
@@ -196,6 +196,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 <script>
 function localDate(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function nextDayKey(date){const [y,m,d]=date.split('-').map(Number);const dt=new Date(y,m-1,d);dt.setDate(dt.getDate()+1);return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0')}
 const TODAY=localDate();
 const MACROS=[
   {key:'cal',name:'Calorías',max:1910,unit:'kcal',color:'#378ADD'},
@@ -461,45 +462,71 @@ function addWeight(){
   renderWeightLog();
 }
 function loadHistorial(){
-  const date=document.getElementById('hist-date').value;
-  if(!date){return}
   const c=document.getElementById('hist-content');
-  let html='';
-  const water=lsGet('water_'+date)||[false,false,false,false];
-  const wc=water.filter(Boolean).length;
-  html+=`<div class="hist-section"><div class="hist-section-title">Agua</div>
-    <div class="hist-row"><span class="hist-label">Yetis tomados</span><span class="hist-val">${wc} / 4${wc===4?' · Meta alcanzada':''}</span></div>
-  </div>`;
-  const macros=lsGet('macros_'+date)||{};
-  const hasMacros=MACROS.some(m=>macros[m.key]>0);
-  html+=`<div class="hist-section"><div class="hist-section-title">Macros</div>`;
-  if(!hasMacros){html+='<div class="hist-empty">Sin macros registrados</div>';}
-  else{MACROS.forEach(m=>{const val=macros[m.key]||0;const pct=Math.min(100,Math.round(val/m.max*100));html+=`<div class="hist-row"><span class="hist-label">${m.name}</span><span class="hist-val">${Math.round(val)} / ${m.max} ${m.unit} (${pct}%)</span></div>`;});}
-  html+='</div>';
-  const sups=lsGet('sups_'+date)||{};
-  const checkedCount=ALL_SUPS.filter(s=>sups[s.key]).length;
-  html+=`<div class="hist-section"><div class="hist-section-title">Suplementos (${checkedCount} / ${ALL_SUPS.length})</div>`;
-  html+=ALL_SUPS.map(s=>{const ok=!!sups[s.key];return`<div class="hist-check"><div class="hist-dot${ok?' checked':''}"></div><span style="color:${ok?'#e0e0e0':'#444'}">${s.name}</span></div>`;}).join('');
-  html+='</div>';
-  const trainLog=lsGet('log_train')||[];
-  const trainDay=trainLog.filter(e=>e.date===date);
-  html+=`<div class="hist-section"><div class="hist-section-title">Entrenamiento</div>`;
-  if(!trainDay.length){html+='<div class="hist-empty">Sin entrenamiento registrado</div>';}
-  else{html+=trainDay.map(e=>`<div class="hist-row"><span class="hist-label">${e.type}</span><span class="hist-val">${e.dur||'—'}</span></div>`).join('');}
-  html+='</div>';
-  const sportLog=lsGet('log_sport')||[];
-  const sportDay=sportLog.filter(e=>e.date===date);
-  html+=`<div class="hist-section"><div class="hist-section-title">Deporte</div>`;
-  if(!sportDay.length){html+='<div class="hist-empty">Sin deporte registrado</div>';}
-  else{html+=sportDay.map(e=>`<div class="hist-row"><span class="hist-label">${e.type}</span><span class="hist-val">${e.dur||'—'}</span></div>`).join('');}
-  html+='</div>';
-  const weightLog=lsGet('weight_log')||[];
-  const weightDay=weightLog.filter(e=>e.date===date);
-  html+=`<div class="hist-section"><div class="hist-section-title">Peso</div>`;
-  if(!weightDay.length){html+='<div class="hist-empty">Sin peso registrado</div>';}
-  else{html+=weightDay.map(e=>`<div class="hist-row"><span class="hist-label">Peso registrado</span><span class="hist-val">${e.val} ${e.unit}</span></div>`).join('');}
-  html+='</div>';
-  c.innerHTML=html;
+  try{
+    const date=document.getElementById('hist-date').value;
+    if(!date){c.innerHTML='<div class="empty-log">Selecciona una fecha y presiona Ver</div>';return}
+    const altDate=nextDayKey(date);
+    let html='';
+    let water=lsGet('water_'+date)||[false,false,false,false];
+    let waterAlt=false;
+    if(!water.some(Boolean)){
+      const wA=lsGet('water_'+altDate);
+      if(wA && Array.isArray(wA) && wA.some(Boolean)){water=wA;waterAlt=true;}
+    }
+    const wc=water.filter(Boolean).length;
+    html+=`<div class="hist-section"><div class="hist-section-title">Agua${waterAlt?' · datos antiguos UTC':''}</div>
+      <div class="hist-row"><span class="hist-label">Yetis tomados</span><span class="hist-val">${wc} / 4${wc===4?' · Meta alcanzada':''}</span></div>
+    </div>`;
+    let macros=lsGet('macros_'+date)||{};
+    let macrosAlt=false;
+    if(!Object.keys(macros).length){
+      const mA=lsGet('macros_'+altDate);
+      if(mA && Object.keys(mA).length){macros=mA;macrosAlt=true;}
+    }
+    const hasMacros=MACROS.some(m=>macros[m.key]>0);
+    html+=`<div class="hist-section"><div class="hist-section-title">Macros${macrosAlt?' · datos antiguos UTC':''}</div>`;
+    if(!hasMacros){html+='<div class="hist-empty">Sin macros registrados</div>';}
+    else{MACROS.forEach(m=>{const val=macros[m.key]||0;const pct=Math.min(100,Math.round(val/m.max*100));const display=Number.isInteger(val)?val:(Math.round(val*10)/10);html+=`<div class="hist-row"><span class="hist-label">${m.name}</span><span class="hist-val">${display} / ${m.max} ${m.unit} (${pct}%)</span></div>`;});}
+    html+='</div>';
+    let sups=lsGet('sups_'+date)||{};
+    let supsAlt=false;
+    if(!Object.keys(sups).length){
+      const sA=lsGet('sups_'+altDate);
+      if(sA && Object.keys(sA).length){sups=sA;supsAlt=true;}
+    }
+    const checkedCount=ALL_SUPS.filter(s=>sups[s.key]).length;
+    html+=`<div class="hist-section"><div class="hist-section-title">Suplementos (${checkedCount} / ${ALL_SUPS.length})${supsAlt?' · datos antiguos UTC':''}</div>`;
+    html+=ALL_SUPS.map(s=>{const ok=!!sups[s.key];return`<div class="hist-check"><div class="hist-dot${ok?' checked':''}"></div><span style="color:${ok?'#e0e0e0':'#444'}">${s.name}</span></div>`;}).join('');
+    html+='</div>';
+    const trainLog=lsGet('log_train')||[];
+    let trainDay=trainLog.filter(e=>e.date===date);
+    let trainAlt=false;
+    if(!trainDay.length){const tA=trainLog.filter(e=>e.date===altDate);if(tA.length){trainDay=tA;trainAlt=true;}}
+    html+=`<div class="hist-section"><div class="hist-section-title">Entrenamiento${trainAlt?' · datos antiguos UTC':''}</div>`;
+    if(!trainDay.length){html+='<div class="hist-empty">Sin entrenamiento registrado</div>';}
+    else{html+=trainDay.map(e=>`<div class="hist-row"><span class="hist-label">${e.type}</span><span class="hist-val">${e.dur||'—'}${e.cal?' · ~'+e.cal+' kcal':''}</span></div>`).join('');}
+    html+='</div>';
+    const sportLog=lsGet('log_sport')||[];
+    let sportDay=sportLog.filter(e=>e.date===date);
+    let sportAlt=false;
+    if(!sportDay.length){const sA=sportLog.filter(e=>e.date===altDate);if(sA.length){sportDay=sA;sportAlt=true;}}
+    html+=`<div class="hist-section"><div class="hist-section-title">Deporte${sportAlt?' · datos antiguos UTC':''}</div>`;
+    if(!sportDay.length){html+='<div class="hist-empty">Sin deporte registrado</div>';}
+    else{html+=sportDay.map(e=>`<div class="hist-row"><span class="hist-label">${e.type}</span><span class="hist-val">${e.dur||'—'}${e.cal?' · ~'+e.cal+' kcal':''}</span></div>`).join('');}
+    html+='</div>';
+    const weightLog=lsGet('weight_log')||[];
+    let weightDay=weightLog.filter(e=>e.date===date);
+    let weightAlt=false;
+    if(!weightDay.length){const wA=weightLog.filter(e=>e.date===altDate);if(wA.length){weightDay=wA;weightAlt=true;}}
+    html+=`<div class="hist-section"><div class="hist-section-title">Peso${weightAlt?' · datos antiguos UTC':''}</div>`;
+    if(!weightDay.length){html+='<div class="hist-empty">Sin peso registrado</div>';}
+    else{html+=weightDay.map(e=>`<div class="hist-row"><span class="hist-label">Peso registrado</span><span class="hist-val">${e.val} ${e.unit}</span></div>`).join('');}
+    html+='</div>';
+    c.innerHTML=html;
+  }catch(err){
+    c.innerHTML='<div class="hist-empty">Error mostrando historial: '+(err&&err.message?err.message:err)+'</div>';
+  }
 }
 function buildTimeline(){
   const c=document.getElementById('mj-timeline');
