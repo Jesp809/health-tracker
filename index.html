@@ -144,6 +144,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
 .hist-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #232328;gap:8px}
 .hist-section-head .hist-section-title{margin:0;padding:0;border:none;flex:1}
 .hist-edit-btn{font-size:11px;padding:6px 12px;border-radius:8px;background:rgba(77,163,255,0.1);color:#9bc2f0;border:1px solid rgba(77,163,255,0.22);cursor:pointer;font-weight:600;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.hist-icon-btn{padding:0;border-radius:7px;background:transparent;border:1px solid var(--border);color:var(--dim);cursor:pointer;-webkit-tap-highlight-color:transparent;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:30px;height:30px;transition:all 0.15s}
+.hist-icon-btn:active{background:#1c1c24;color:#fff;transform:scale(0.95)}
 .hist-save-btn{padding:11px 14px;border-radius:10px;background:linear-gradient(180deg,#34D399 0%,#1f8b3a 100%);color:#fff;border:none;cursor:pointer;font-size:13px;font-weight:600;flex:1;-webkit-tap-highlight-color:transparent;box-shadow:0 4px 12px rgba(48,209,88,0.25)}
 .hist-cancel-btn{padding:11px 14px;border-radius:10px;background:#15151c;color:var(--dim);border:1px solid var(--border);cursor:pointer;font-size:13px;font-weight:600;flex:1;-webkit-tap-highlight-color:transparent}
 .hist-edit-actions{display:flex;gap:8px;margin-top:14px}
@@ -685,11 +687,11 @@ function histCompact(section,title,summary,alt,accent){
   const altSuffix=alt?' · UTC':'';
   return `<div class="hist-card" onclick="toggleHistSection('${section}')"><div class="hist-card-row"><span class="hist-card-dot" style="background:${accent};box-shadow:0 0 8px ${accent}"></span><span class="hist-card-title">${title}${altSuffix}</span><span class="hist-card-summary">${summary}</span><svg class="hist-chevron" width="10" height="10" viewBox="0 0 10 10"><path d="M3 1 L7 5 L3 9" stroke="currentColor" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>`;
 }
-function aguaSummary(date){let w=lsGet('water_'+date)||[false,false,false,false];if(!w.some(Boolean)){const a=lsGet('water_'+nextDayKey(date));if(a&&Array.isArray(a)&&a.some(Boolean))w=a;}const c=w.filter(Boolean).length;return c+' / 4'+(c===4?' ✓':'');}
-function macrosSummary(date){let m=lsGet('macros_'+date)||{};if(!Object.keys(m).length){const a=lsGet('macros_'+nextDayKey(date));if(a&&Object.keys(a).length)m=a;}const cal=m.cal||0;return cal>0?Math.round(cal)+' kcal':'Sin datos';}
-function supsSummary(date){let s=lsGet('sups_'+date)||{};if(!Object.keys(s).length){const a=lsGet('sups_'+nextDayKey(date));if(a&&Object.keys(a).length)s=a;}const c=ALL_SUPS.filter(x=>s[x.key]).length;return c+' / '+ALL_SUPS.length;}
-function logSummary(type,date){const l=lsGet('log_'+type)||[];let e=l.filter(x=>x.date===date);if(!e.length)e=l.filter(x=>x.date===nextDayKey(date));if(!e.length)return 'Sin datos';if(e.length===1)return e[0].type+(e[0].dur?' · '+e[0].dur:'');return e.length+' entradas';}
-function weightSummary(date){const l=lsGet('weight_log')||[];let e=l.filter(x=>x.date===date);if(!e.length)e=l.filter(x=>x.date===nextDayKey(date));if(!e.length)return 'Sin datos';return e[0].val+' '+e[0].unit;}
+function aguaSummary(date){const w=lsGet('water_'+date)||[false,false,false,false];const c=w.filter(Boolean).length;return c+' / 4'+(c===4?' ✓':'');}
+function macrosSummary(date){const m=lsGet('macros_'+date)||{};const cal=m.cal||0;return cal>0?Math.round(cal)+' kcal':'Sin datos';}
+function supsSummary(date){const s=lsGet('sups_'+date)||{};const c=ALL_SUPS.filter(x=>s[x.key]).length;return c+' / '+ALL_SUPS.length;}
+function logSummary(type,date){const l=lsGet('log_'+type)||[];const e=l.filter(x=>x.date===date);if(!e.length)return 'Sin datos';if(e.length===1)return e[0].type+(e[0].dur?' · '+e[0].dur:'');return e.length+' entradas';}
+function weightSummary(date){const l=lsGet('weight_log')||[];const e=l.filter(x=>x.date===date);if(!e.length)return 'Sin datos';return e[0].val+' '+e[0].unit;}
 function loadHistorial(){
   const c=document.getElementById('hist-content');
   try{
@@ -716,46 +718,39 @@ function rerenderHist(section){
 }
 function editHist(section){window._histEdit[section]=true;window._histExpanded[section]=true;rerenderHist(section);}
 function cancelHist(section){window._histEdit[section]=false;rerenderHist(section);}
-function histHead(title,altLabel,section,editing){
-  const altSuffix=altLabel?' · datos antiguos UTC':'';
+function histHead(title,_alt,section,editing){
   const editBtn=editing?'':`<button class="hist-edit-btn" onclick="editHist('${section}')">Editar</button>`;
-  return `<div class="hist-section-head"><div class="hist-section-title">${title}${altSuffix}</div>${editBtn}</div>`;
+  const closeBtn=editing?'':`<button class="hist-icon-btn" onclick="toggleHistSection('${section}')" aria-label="Cerrar"><svg width="11" height="11" viewBox="0 0 11 11"><path d="M2 7 L5.5 3 L9 7" stroke="currentColor" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
+  return `<div class="hist-section-head"><div class="hist-section-title">${title}</div>${editBtn}${closeBtn}</div>`;
 }
 function renderHistAgua(date,editing){
-  const altDate=nextDayKey(date);
-  let water=lsGet('water_'+date)||[false,false,false,false];
-  let alt=false;
-  if(!water.some(Boolean)){const wA=lsGet('water_'+altDate);if(wA&&Array.isArray(wA)&&wA.some(Boolean)){water=wA;alt=true;}}
+  const water=lsGet('water_'+date)||[false,false,false,false];
   const wc=water.filter(Boolean).length;
-  if(!editing&&!window._histExpanded.agua)return histCompact('agua','Agua',aguaSummary(date),alt,'#4DA3FF');
+  if(!editing&&!window._histExpanded.agua)return histCompact('agua','Agua',aguaSummary(date),false,'#4DA3FF');
   if(editing){
     const grid=water.map((v,i)=>`<button class="yeti-btn${v?' done':''}" onclick="toggleHistYeti(${i})">Yeti ${i+1}</button>`).join('');
-    return `<div class="hist-section">${histHead('Agua',alt,'agua',true)}<div class="yeti-grid">${grid}</div><div class="water-label">${wc} / 4 Yetis${wc===4?' — Meta alcanzada!':''}</div><div class="hist-edit-actions"><button class="hist-cancel-btn" onclick="cancelHist('agua')">Cerrar</button></div></div>`;
+    return `<div class="hist-section">${histHead('Agua',false,'agua',true)}<div class="yeti-grid">${grid}</div><div class="water-label">${wc} / 4 Yetis${wc===4?' — Meta alcanzada!':''}</div><div class="hist-edit-actions"><button class="hist-cancel-btn" onclick="cancelHist('agua')">Cerrar</button></div></div>`;
   }
-  return `<div class="hist-section">${histHead('Agua',alt,'agua',false)}<div class="hist-row"><span class="hist-label">Yetis tomados</span><span class="hist-val">${wc} / 4${wc===4?' · Meta alcanzada':''}</span></div></div>`;
+  return `<div class="hist-section">${histHead('Agua',false,'agua',false)}<div class="hist-row"><span class="hist-label">Yetis tomados</span><span class="hist-val">${wc} / 4${wc===4?' · Meta alcanzada':''}</span></div></div>`;
 }
 function toggleHistYeti(i){
   const date=window._histDate;
-  let water=lsGet('water_'+date)||[false,false,false,false];
-  if(!water.some(Boolean)){const wA=lsGet('water_'+nextDayKey(date));if(wA&&Array.isArray(wA)&&wA.some(Boolean))water=wA.slice();}
+  const water=lsGet('water_'+date)||[false,false,false,false];
   water[i]=!water[i];
   lsSave('water_'+date,water);
   if(date===TODAY){const el=document.getElementById('y'+i);if(el)el.classList.toggle('done',water[i]);updateWaterLabel(water);}
   rerenderHist('agua');
 }
 function renderHistMacros(date,editing){
-  const altDate=nextDayKey(date);
-  let macros=lsGet('macros_'+date)||{};
-  let alt=false;
-  if(!Object.keys(macros).length){const mA=lsGet('macros_'+altDate);if(mA&&Object.keys(mA).length){macros=mA;alt=true;}}
-  if(!editing&&!window._histExpanded.macros)return histCompact('macros','Macros',macrosSummary(date),alt,'#EF9F27');
+  const macros=lsGet('macros_'+date)||{};
+  if(!editing&&!window._histExpanded.macros)return histCompact('macros','Macros',macrosSummary(date),false,'#EF9F27');
   if(editing){
     const inputs=MACROS.map(m=>{const val=macros[m.key]!==undefined?macros[m.key]:'';return `<div class="macro-input-row" style="margin-bottom:8px"><input type="text" inputmode="decimal" id="histmac-${m.key}" value="${val}" placeholder="${m.name}"><span>/ ${m.max} ${m.unit}</span></div>`;}).join('');
-    return `<div class="hist-section">${histHead('Macros',alt,'macros',true)}${inputs}<div class="hist-edit-actions"><button class="hist-save-btn" onclick="saveHistMacros()">Guardar</button><button class="hist-cancel-btn" onclick="cancelHist('macros')">Cancelar</button></div></div>`;
+    return `<div class="hist-section">${histHead('Macros',false,'macros',true)}${inputs}<div class="hist-edit-actions"><button class="hist-save-btn" onclick="saveHistMacros()">Guardar</button><button class="hist-cancel-btn" onclick="cancelHist('macros')">Cancelar</button></div></div>`;
   }
   const hasMacros=MACROS.some(m=>macros[m.key]>0);
   let body=hasMacros?MACROS.map(m=>{const val=macros[m.key]||0;const pct=Math.min(100,Math.round(val/m.max*100));const display=Number.isInteger(val)?val:(Math.round(val*10)/10);return `<div class="hist-row"><span class="hist-label">${m.name}</span><span class="hist-val">${display} / ${m.max} ${m.unit} (${pct}%)</span></div>`;}).join(''):'<div class="hist-empty">Sin macros registrados</div>';
-  return `<div class="hist-section">${histHead('Macros',alt,'macros',false)}${body}</div>`;
+  return `<div class="hist-section">${histHead('Macros',false,'macros',false)}${body}</div>`;
 }
 function saveHistMacros(){
   const date=window._histDate;
@@ -767,45 +762,38 @@ function saveHistMacros(){
   rerenderHist('macros');
 }
 function renderHistSups(date,editing){
-  const altDate=nextDayKey(date);
-  let sups=lsGet('sups_'+date)||{};
-  let alt=false;
-  if(!Object.keys(sups).length){const sA=lsGet('sups_'+altDate);if(sA&&Object.keys(sA).length){sups=sA;alt=true;}}
+  const sups=lsGet('sups_'+date)||{};
   const checkedCount=ALL_SUPS.filter(s=>sups[s.key]).length;
-  if(!editing&&!window._histExpanded.sups)return histCompact('sups','Suplementos',supsSummary(date),alt,'#30D158');
+  if(!editing&&!window._histExpanded.sups)return histCompact('sups','Suplementos',supsSummary(date),false,'#30D158');
   if(editing){
     const items=ALL_SUPS.map(s=>`<div class="hist-check"><input type="checkbox" class="sup-check" id="histsup-${s.key}"${sups[s.key]?' checked':''} onchange="toggleHistSup('${s.key}',this.checked)"><span style="color:#e0e0e0">${s.name}</span></div>`).join('');
-    return `<div class="hist-section">${histHead('Suplementos ('+checkedCount+' / '+ALL_SUPS.length+')',alt,'sups',true)}${items}<div class="hist-edit-actions"><button class="hist-cancel-btn" onclick="cancelHist('sups')">Cerrar</button></div></div>`;
+    return `<div class="hist-section">${histHead('Suplementos ('+checkedCount+' / '+ALL_SUPS.length+')',false,'sups',true)}${items}<div class="hist-edit-actions"><button class="hist-cancel-btn" onclick="cancelHist('sups')">Cerrar</button></div></div>`;
   }
   const items=ALL_SUPS.map(s=>{const ok=!!sups[s.key];return `<div class="hist-check"><div class="hist-dot${ok?' checked':''}"></div><span style="color:${ok?'#e0e0e0':'#444'}">${s.name}</span></div>`;}).join('');
-  return `<div class="hist-section">${histHead('Suplementos ('+checkedCount+' / '+ALL_SUPS.length+')',alt,'sups',false)}${items}</div>`;
+  return `<div class="hist-section">${histHead('Suplementos ('+checkedCount+' / '+ALL_SUPS.length+')',false,'sups',false)}${items}</div>`;
 }
 function toggleHistSup(key,val){
   const date=window._histDate;
-  let sups=lsGet('sups_'+date)||{};
-  if(!Object.keys(sups).length){const sA=lsGet('sups_'+nextDayKey(date));if(sA&&Object.keys(sA).length)sups=Object.assign({},sA);}
+  const sups=lsGet('sups_'+date)||{};
   sups[key]=val;
   lsSave('sups_'+date,sups);
   if(date===TODAY){const el=document.getElementById('sup-'+key);if(el)el.checked=val;}
   rerenderHist('sups');
 }
 function renderHistLog(type,date,editing){
-  const altDate=nextDayKey(date);
   const log=lsGet('log_'+type)||[];
-  let entries=log.map((e,idx)=>Object.assign({_idx:idx},e)).filter(e=>e.date===date);
-  let alt=false;
-  if(!entries.length){const a=log.map((e,idx)=>Object.assign({_idx:idx},e)).filter(e=>e.date===altDate);if(a.length){entries=a;alt=true;}}
+  const entries=log.map((e,idx)=>Object.assign({_idx:idx},e)).filter(e=>e.date===date);
   const titleMap={train:'Entrenamiento',sport:'Deporte'};
   const title=titleMap[type];
   const placeholderMap={train:'Tipo de entrenamiento',sport:'Tipo de deporte (padel, tenis, fútbol...)'};
   const accentMap={train:'#FF9F0A',sport:'#FF6B6B'};
-  if(!editing&&!window._histExpanded[type])return histCompact(type,title,logSummary(type,date),alt,accentMap[type]);
+  if(!editing&&!window._histExpanded[type])return histCompact(type,title,logSummary(type,date),false,accentMap[type]);
   if(editing){
     const list=entries.length?entries.map(e=>{const cal=entryCalories(e);return `<div class="hist-row" style="align-items:center"><span class="hist-val" style="text-align:left;flex:1;max-width:none">${e.type}${e.dur?' · '+e.dur:''}${cal?' · ~'+cal+' kcal':''}</span><button class="log-del" onclick="delHistLog('${type}',${e._idx})">x</button></div>`;}).join(''):'<div class="hist-empty">Sin entradas</div>';
-    return `<div class="hist-section">${histHead(title,alt,type,true)}${list}<div class="log-form" style="margin-top:14px"><div class="hist-form-date-label">Agregando a <b>${date}</b></div><input type="text" id="hist-${type}-type" placeholder="${placeholderMap[type]}" oninput="updateHistCalPreview('${type}')"><input type="text" id="hist-${type}-dur" placeholder="Duración (ej: 1h, 30 min, 1:30)" oninput="updateHistCalPreview('${type}')"><div class="cal-preview" id="hist-${type}-cal-preview"></div><button onclick="addHistLog('${type}')">+ Agregar a ${date}</button></div><div class="hist-edit-actions"><button class="hist-cancel-btn" onclick="cancelHist('${type}')">Cerrar</button></div></div>`;
+    return `<div class="hist-section">${histHead(title,false,type,true)}${list}<div class="log-form" style="margin-top:14px"><div class="hist-form-date-label">Agregando a <b>${date}</b></div><input type="text" id="hist-${type}-type" placeholder="${placeholderMap[type]}" oninput="updateHistCalPreview('${type}')"><input type="text" id="hist-${type}-dur" placeholder="Duración (ej: 1h, 30 min, 1:30)" oninput="updateHistCalPreview('${type}')"><div class="cal-preview" id="hist-${type}-cal-preview"></div><button onclick="addHistLog('${type}')">+ Agregar a ${date}</button></div><div class="hist-edit-actions"><button class="hist-cancel-btn" onclick="cancelHist('${type}')">Cerrar</button></div></div>`;
   }
   let body=entries.length?entries.map(e=>{const cal=entryCalories(e);return `<div class="hist-row"><span class="hist-label">${e.type}</span><span class="hist-val">${e.dur||'—'}${cal?' · ~'+cal+' kcal':''}</span></div>`;}).join(''):'<div class="hist-empty">Sin '+title.toLowerCase()+' registrado</div>';
-  return `<div class="hist-section">${histHead(title,alt,type,false)}${body}</div>`;
+  return `<div class="hist-section">${histHead(title,false,type,false)}${body}</div>`;
 }
 function renderHistTrain(date,editing){return renderHistLog('train',date,editing);}
 function renderHistSport(date,editing){return renderHistLog('sport',date,editing);}
@@ -842,18 +830,15 @@ function updateHistCalPreview(type){
   }else{el.textContent='~'+cal+' kcal estimadas';el.classList.remove('hint');}
 }
 function renderHistWeight(date,editing){
-  const altDate=nextDayKey(date);
   const log=lsGet('weight_log')||[];
-  let entries=log.map((e,idx)=>Object.assign({_idx:idx},e)).filter(e=>e.date===date);
-  let alt=false;
-  if(!entries.length){const a=log.map((e,idx)=>Object.assign({_idx:idx},e)).filter(e=>e.date===altDate);if(a.length){entries=a;alt=true;}}
-  if(!editing&&!window._histExpanded.weight)return histCompact('weight','Peso',weightSummary(date),alt,'#FF6482');
+  const entries=log.map((e,idx)=>Object.assign({_idx:idx},e)).filter(e=>e.date===date);
+  if(!editing&&!window._histExpanded.weight)return histCompact('weight','Peso',weightSummary(date),false,'#FF6482');
   if(editing){
     const list=entries.length?entries.map(e=>`<div class="hist-row" style="align-items:center"><span class="hist-val" style="text-align:left;flex:1;max-width:none">${e.val} ${e.unit}</span><button class="log-del" onclick="delHistWeight(${e._idx})">x</button></div>`).join(''):'<div class="hist-empty">Sin peso</div>';
-    return `<div class="hist-section">${histHead('Peso',alt,'weight',true)}${list}<div class="hist-form-date-label" style="margin-top:14px">Agregando a <b>${date}</b></div><div class="weight-row" style="margin-top:6px"><input type="number" id="hist-weight-input" placeholder="Peso" step="0.1"><select id="hist-weight-unit"><option>lbs</option><option>kg</option></select><button onclick="addHistWeight()">+</button></div><div class="hist-edit-actions"><button class="hist-cancel-btn" onclick="cancelHist('weight')">Cerrar</button></div></div>`;
+    return `<div class="hist-section">${histHead('Peso',false,'weight',true)}${list}<div class="hist-form-date-label" style="margin-top:14px">Agregando a <b>${date}</b></div><div class="weight-row" style="margin-top:6px"><input type="number" id="hist-weight-input" placeholder="Peso" step="0.1"><select id="hist-weight-unit"><option>lbs</option><option>kg</option></select><button onclick="addHistWeight()">+</button></div><div class="hist-edit-actions"><button class="hist-cancel-btn" onclick="cancelHist('weight')">Cerrar</button></div></div>`;
   }
   let body=entries.length?entries.map(e=>`<div class="hist-row"><span class="hist-label">Peso registrado</span><span class="hist-val">${e.val} ${e.unit}</span></div>`).join(''):'<div class="hist-empty">Sin peso registrado</div>';
-  return `<div class="hist-section">${histHead('Peso',alt,'weight',false)}${body}</div>`;
+  return `<div class="hist-section">${histHead('Peso',false,'weight',false)}${body}</div>`;
 }
 function addHistWeight(){
   const date=window._histDate;
