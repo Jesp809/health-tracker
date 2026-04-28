@@ -149,6 +149,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
 .hist-edit-actions{display:flex;gap:8px;margin-top:14px}
 .cal-preview{font-size:11px;color:var(--orange);text-align:right;padding:0 4px 4px;min-height:14px;font-weight:600}
 .cal-preview.hint{color:var(--muted);font-weight:500}
+.hist-date-banner{font-size:11px;color:var(--dim);text-align:center;padding:10px 12px;border-radius:10px;background:rgba(94,92,230,0.08);border:1px solid rgba(94,92,230,0.18);margin-bottom:14px}
+.hist-date-banner b{color:#fff;font-weight:600}
+.hist-form-date-label{font-size:11px;color:var(--dim);margin-bottom:6px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border)}
+.hist-form-date-label b{color:var(--orange-soft);font-weight:700}
+.hist-card{background:linear-gradient(180deg,#1c1c24 0%,#16161e 100%);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:all 0.2s;-webkit-tap-highlight-color:transparent}
+.hist-card:active{transform:scale(0.99);background:linear-gradient(180deg,#22222a 0%,#1a1a22 100%)}
+.hist-card-row{display:flex;align-items:center;gap:11px}
+.hist-card-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.hist-card-title{font-size:14px;font-weight:600;color:#fff;flex-shrink:0;letter-spacing:-0.005em}
+.hist-card-summary{font-size:13px;color:var(--dim);margin-left:auto;font-variant-numeric:tabular-nums;font-weight:500;text-align:right;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-chevron{color:var(--muted);flex-shrink:0;margin-left:6px}
 .data-actions{display:flex;gap:8px;flex-wrap:wrap}
 .data-btn{flex:1;min-width:130px;padding:12px 14px;border-radius:11px;border:1px solid var(--border);background:#15151c;color:#e8e8ed;font-size:13px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.15s}
 .data-btn:active{transform:scale(0.98)}
@@ -433,7 +444,7 @@ function cancelTargets(){
 }
 function todayBurned(){
   const t=lsGet('log_train')||[];const s=lsGet('log_sport')||[];
-  return [...t,...s].filter(e=>e.date===TODAY).reduce((sum,e)=>sum+(e.cal||0),0);
+  return [...t,...s].filter(e=>e.date===TODAY).reduce((sum,e)=>sum+(entryCalories(e)||0),0);
 }
 function todayConsumed(){const m=lsGet('macros_'+TODAY)||{};return m.cal||0;}
 function updateBalance(){
@@ -500,8 +511,9 @@ function renderLog(type){
   if(!d.length){c.innerHTML='<div class="empty-log">Sin entradas aún</div>';return}
   c.innerHTML=d.slice().reverse().slice(0,10).map((e,ri)=>{
     const realIdx=d.length-1-ri;
+    const cal=entryCalories(e);
     return `<div class="log-entry">
-      <div class="log-entry-left">${e.type}${e.cal?' <span style="color:#EF9F27;font-size:11px">~${e.cal} kcal</span>':''}</div>
+      <div class="log-entry-left">${e.type}${cal?' <span style="color:var(--orange-soft);font-size:11px;font-weight:600">~'+cal+' kcal</span>':''}</div>
       <div class="log-entry-right">${e.date}${e.dur?' · '+e.dur:''}<button class="log-del" onclick="delLog('${type}',${realIdx})">x</button></div>
     </div>`;
   }).join('');
@@ -509,8 +521,12 @@ function renderLog(type){
 function parseDurMins(s){
   if(!s)return null;
   s=s.toLowerCase().trim();
-  let m=s.match(/(\d+\.?\d*)\s*h(?:ora)?s?\s*(\d+)?/);
-  if(m)return parseFloat(m[1])*60+(parseInt(m[2])||0);
+  let m;
+  if(/media\s+hora/.test(s))return 30;
+  if(/hora\s+y\s+media/.test(s))return 90;
+  if(/^un[a]?\s+hora$/.test(s))return 60;
+  m=s.match(/(\d+\.?\d*)\s*h(?:ora|r)?s?\s*(\d+)?\s*(?:min|m)?/);
+  if(m){const h=parseFloat(m[1]);const mn=m[2]?parseInt(m[2]):0;if(h>0||mn>0)return h*60+mn;}
   m=s.match(/(\d+):(\d+)/);
   if(m)return parseInt(m[1])*60+parseInt(m[2]);
   m=s.match(/(\d+\.?\d*)\s*min/);
@@ -521,13 +537,23 @@ function parseDurMins(s){
 }
 function getMET(name){
   const n=name.toLowerCase();
+  if(/tenis de mesa|ping[ -]?pong|table tennis/.test(n))return 4;
+  if(/p[aá]del|paddle/.test(n))return 7;
+  if(/tenis|tennis/.test(n))return 7.3;
   if(/f[uú]tb|soccer|futsal/.test(n))return 8;
+  if(/baloncesto|basket|b[aá]squet/.test(n))return 7;
+  if(/voleibol|volley|v[oó]ley/.test(n))return 5;
   if(/corr|run|jog|trotar/.test(n))return 9;
-  if(/natac|swim|piscina/.test(n))return 7;
-  if(/hiit|circuito|circuit/.test(n))return 8;
-  if(/bici|cicl|bike/.test(n))return 6;
-  if(/caminat|walk|caminar/.test(n))return 3.5;
-  if(/pesas|gym|d[ií]a [abc]|upper|lower|press|remo|squat/.test(n))return 4;
+  if(/natac|swim|piscina|nadar/.test(n))return 7;
+  if(/hiit|circuito|circuit|crossfit/.test(n))return 8;
+  if(/bici|cicl|bike|spinning/.test(n))return 6;
+  if(/caminat|walk|caminar|hike|senderis/.test(n))return 3.5;
+  if(/yoga|pilates|estiramien|stretch/.test(n))return 3;
+  if(/box(eo|ing)|kickbox|mma|jiu/.test(n))return 8;
+  if(/baile|danza|dance|salsa|bachata|merengue|zumba/.test(n))return 6;
+  if(/escal|climb/.test(n))return 8;
+  if(/golf/.test(n))return 4.5;
+  if(/pesas|gym|d[ií]a [abc]|upper|lower|press|remo|squat|deadlift/.test(n))return 4.5;
   return 4;
 }
 function estCalories(name,durStr){
@@ -539,6 +565,10 @@ function estCalories(name,durStr){
   const kg=last.unit==='lbs'?parseFloat(last.val)*0.453592:parseFloat(last.val);
   if(!kg)return null;
   return Math.round(getMET(name)*kg*(mins/60));
+}
+function entryCalories(e){
+  if(typeof e.cal==='number'&&!isNaN(e.cal)&&e.cal>0)return e.cal;
+  return estCalories(e.type,e.dur);
 }
 function addLog(type){
   const date=document.getElementById(type+'-date').value||TODAY;
@@ -644,7 +674,22 @@ function handleImport(file){
   reader.readAsText(file);
 }
 window._histEdit={};
+window._histExpanded={};
 window._histDate='';
+function toggleHistSection(section){
+  if(window._histEdit[section])return;
+  window._histExpanded[section]=!window._histExpanded[section];
+  rerenderHist(section);
+}
+function histCompact(section,title,summary,alt,accent){
+  const altSuffix=alt?' · UTC':'';
+  return `<div class="hist-card" onclick="toggleHistSection('${section}')"><div class="hist-card-row"><span class="hist-card-dot" style="background:${accent};box-shadow:0 0 8px ${accent}"></span><span class="hist-card-title">${title}${altSuffix}</span><span class="hist-card-summary">${summary}</span><svg class="hist-chevron" width="10" height="10" viewBox="0 0 10 10"><path d="M3 1 L7 5 L3 9" stroke="currentColor" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>`;
+}
+function aguaSummary(date){let w=lsGet('water_'+date)||[false,false,false,false];if(!w.some(Boolean)){const a=lsGet('water_'+nextDayKey(date));if(a&&Array.isArray(a)&&a.some(Boolean))w=a;}const c=w.filter(Boolean).length;return c+' / 4'+(c===4?' ✓':'');}
+function macrosSummary(date){let m=lsGet('macros_'+date)||{};if(!Object.keys(m).length){const a=lsGet('macros_'+nextDayKey(date));if(a&&Object.keys(a).length)m=a;}const cal=m.cal||0;return cal>0?Math.round(cal)+' kcal':'Sin datos';}
+function supsSummary(date){let s=lsGet('sups_'+date)||{};if(!Object.keys(s).length){const a=lsGet('sups_'+nextDayKey(date));if(a&&Object.keys(a).length)s=a;}const c=ALL_SUPS.filter(x=>s[x.key]).length;return c+' / '+ALL_SUPS.length;}
+function logSummary(type,date){const l=lsGet('log_'+type)||[];let e=l.filter(x=>x.date===date);if(!e.length)e=l.filter(x=>x.date===nextDayKey(date));if(!e.length)return 'Sin datos';if(e.length===1)return e[0].type+(e[0].dur?' · '+e[0].dur:'');return e.length+' entradas';}
+function weightSummary(date){const l=lsGet('weight_log')||[];let e=l.filter(x=>x.date===date);if(!e.length)e=l.filter(x=>x.date===nextDayKey(date));if(!e.length)return 'Sin datos';return e[0].val+' '+e[0].unit;}
 function loadHistorial(){
   const c=document.getElementById('hist-content');
   try{
@@ -652,7 +697,9 @@ function loadHistorial(){
     if(!date){c.innerHTML='<div class="empty-log">Selecciona una fecha y presiona Ver</div>';return}
     window._histDate=date;
     window._histEdit={agua:false,macros:false,sups:false,train:false,sport:false,weight:false};
+    window._histExpanded={agua:false,macros:false,sups:false,train:false,sport:false,weight:false};
     c.innerHTML=
+      '<div class="hist-date-banner">Mostrando <b>'+date+'</b> · tap una sección para ver detalle</div>'+
       '<div id="hsec-agua">'+renderHistAgua(date,false)+'</div>'+
       '<div id="hsec-macros">'+renderHistMacros(date,false)+'</div>'+
       '<div id="hsec-sups">'+renderHistSups(date,false)+'</div>'+
@@ -667,7 +714,7 @@ function rerenderHist(section){
   const renderers={agua:renderHistAgua,macros:renderHistMacros,sups:renderHistSups,train:renderHistTrain,sport:renderHistSport,weight:renderHistWeight};
   document.getElementById('hsec-'+section).innerHTML=renderers[section](window._histDate,!!window._histEdit[section]);
 }
-function editHist(section){window._histEdit[section]=true;rerenderHist(section);}
+function editHist(section){window._histEdit[section]=true;window._histExpanded[section]=true;rerenderHist(section);}
 function cancelHist(section){window._histEdit[section]=false;rerenderHist(section);}
 function histHead(title,altLabel,section,editing){
   const altSuffix=altLabel?' · datos antiguos UTC':'';
@@ -680,6 +727,7 @@ function renderHistAgua(date,editing){
   let alt=false;
   if(!water.some(Boolean)){const wA=lsGet('water_'+altDate);if(wA&&Array.isArray(wA)&&wA.some(Boolean)){water=wA;alt=true;}}
   const wc=water.filter(Boolean).length;
+  if(!editing&&!window._histExpanded.agua)return histCompact('agua','Agua',aguaSummary(date),alt,'#4DA3FF');
   if(editing){
     const grid=water.map((v,i)=>`<button class="yeti-btn${v?' done':''}" onclick="toggleHistYeti(${i})">Yeti ${i+1}</button>`).join('');
     return `<div class="hist-section">${histHead('Agua',alt,'agua',true)}<div class="yeti-grid">${grid}</div><div class="water-label">${wc} / 4 Yetis${wc===4?' — Meta alcanzada!':''}</div><div class="hist-edit-actions"><button class="hist-cancel-btn" onclick="cancelHist('agua')">Cerrar</button></div></div>`;
@@ -700,6 +748,7 @@ function renderHistMacros(date,editing){
   let macros=lsGet('macros_'+date)||{};
   let alt=false;
   if(!Object.keys(macros).length){const mA=lsGet('macros_'+altDate);if(mA&&Object.keys(mA).length){macros=mA;alt=true;}}
+  if(!editing&&!window._histExpanded.macros)return histCompact('macros','Macros',macrosSummary(date),alt,'#EF9F27');
   if(editing){
     const inputs=MACROS.map(m=>{const val=macros[m.key]!==undefined?macros[m.key]:'';return `<div class="macro-input-row" style="margin-bottom:8px"><input type="text" inputmode="decimal" id="histmac-${m.key}" value="${val}" placeholder="${m.name}"><span>/ ${m.max} ${m.unit}</span></div>`;}).join('');
     return `<div class="hist-section">${histHead('Macros',alt,'macros',true)}${inputs}<div class="hist-edit-actions"><button class="hist-save-btn" onclick="saveHistMacros()">Guardar</button><button class="hist-cancel-btn" onclick="cancelHist('macros')">Cancelar</button></div></div>`;
@@ -723,6 +772,7 @@ function renderHistSups(date,editing){
   let alt=false;
   if(!Object.keys(sups).length){const sA=lsGet('sups_'+altDate);if(sA&&Object.keys(sA).length){sups=sA;alt=true;}}
   const checkedCount=ALL_SUPS.filter(s=>sups[s.key]).length;
+  if(!editing&&!window._histExpanded.sups)return histCompact('sups','Suplementos',supsSummary(date),alt,'#30D158');
   if(editing){
     const items=ALL_SUPS.map(s=>`<div class="hist-check"><input type="checkbox" class="sup-check" id="histsup-${s.key}"${sups[s.key]?' checked':''} onchange="toggleHistSup('${s.key}',this.checked)"><span style="color:#e0e0e0">${s.name}</span></div>`).join('');
     return `<div class="hist-section">${histHead('Suplementos ('+checkedCount+' / '+ALL_SUPS.length+')',alt,'sups',true)}${items}<div class="hist-edit-actions"><button class="hist-cancel-btn" onclick="cancelHist('sups')">Cerrar</button></div></div>`;
@@ -747,12 +797,14 @@ function renderHistLog(type,date,editing){
   if(!entries.length){const a=log.map((e,idx)=>Object.assign({_idx:idx},e)).filter(e=>e.date===altDate);if(a.length){entries=a;alt=true;}}
   const titleMap={train:'Entrenamiento',sport:'Deporte'};
   const title=titleMap[type];
-  const placeholderMap={train:'Tipo de entrenamiento',sport:'Tipo de deporte'};
+  const placeholderMap={train:'Tipo de entrenamiento',sport:'Tipo de deporte (padel, tenis, fútbol...)'};
+  const accentMap={train:'#FF9F0A',sport:'#FF6B6B'};
+  if(!editing&&!window._histExpanded[type])return histCompact(type,title,logSummary(type,date),alt,accentMap[type]);
   if(editing){
-    const list=entries.length?entries.map(e=>`<div class="hist-row" style="align-items:center"><span class="hist-val" style="text-align:left;flex:1;max-width:none">${e.type}${e.dur?' · '+e.dur:''}${e.cal?' · ~'+e.cal+' kcal':''}</span><button class="log-del" onclick="delHistLog('${type}',${e._idx})">x</button></div>`).join(''):'<div class="hist-empty">Sin entradas</div>';
-    return `<div class="hist-section">${histHead(title,alt,type,true)}${list}<div class="log-form" style="margin-top:14px"><input type="text" id="hist-${type}-type" placeholder="${placeholderMap[type]}" oninput="updateHistCalPreview('${type}')"><input type="text" id="hist-${type}-dur" placeholder="Duración (opcional)" oninput="updateHistCalPreview('${type}')"><div class="cal-preview" id="hist-${type}-cal-preview"></div><button onclick="addHistLog('${type}')">+ Agregar a esta fecha</button></div><div class="hist-edit-actions"><button class="hist-cancel-btn" onclick="cancelHist('${type}')">Cerrar</button></div></div>`;
+    const list=entries.length?entries.map(e=>{const cal=entryCalories(e);return `<div class="hist-row" style="align-items:center"><span class="hist-val" style="text-align:left;flex:1;max-width:none">${e.type}${e.dur?' · '+e.dur:''}${cal?' · ~'+cal+' kcal':''}</span><button class="log-del" onclick="delHistLog('${type}',${e._idx})">x</button></div>`;}).join(''):'<div class="hist-empty">Sin entradas</div>';
+    return `<div class="hist-section">${histHead(title,alt,type,true)}${list}<div class="log-form" style="margin-top:14px"><div class="hist-form-date-label">Agregando a <b>${date}</b></div><input type="text" id="hist-${type}-type" placeholder="${placeholderMap[type]}" oninput="updateHistCalPreview('${type}')"><input type="text" id="hist-${type}-dur" placeholder="Duración (ej: 1h, 30 min, 1:30)" oninput="updateHistCalPreview('${type}')"><div class="cal-preview" id="hist-${type}-cal-preview"></div><button onclick="addHistLog('${type}')">+ Agregar a ${date}</button></div><div class="hist-edit-actions"><button class="hist-cancel-btn" onclick="cancelHist('${type}')">Cerrar</button></div></div>`;
   }
-  let body=entries.length?entries.map(e=>`<div class="hist-row"><span class="hist-label">${e.type}</span><span class="hist-val">${e.dur||'—'}${e.cal?' · ~'+e.cal+' kcal':''}</span></div>`).join(''):'<div class="hist-empty">Sin '+title.toLowerCase()+' registrado</div>';
+  let body=entries.length?entries.map(e=>{const cal=entryCalories(e);return `<div class="hist-row"><span class="hist-label">${e.type}</span><span class="hist-val">${e.dur||'—'}${cal?' · ~'+cal+' kcal':''}</span></div>`;}).join(''):'<div class="hist-empty">Sin '+title.toLowerCase()+' registrado</div>';
   return `<div class="hist-section">${histHead(title,alt,type,false)}${body}</div>`;
 }
 function renderHistTrain(date,editing){return renderHistLog('train',date,editing);}
@@ -795,9 +847,10 @@ function renderHistWeight(date,editing){
   let entries=log.map((e,idx)=>Object.assign({_idx:idx},e)).filter(e=>e.date===date);
   let alt=false;
   if(!entries.length){const a=log.map((e,idx)=>Object.assign({_idx:idx},e)).filter(e=>e.date===altDate);if(a.length){entries=a;alt=true;}}
+  if(!editing&&!window._histExpanded.weight)return histCompact('weight','Peso',weightSummary(date),alt,'#FF6482');
   if(editing){
     const list=entries.length?entries.map(e=>`<div class="hist-row" style="align-items:center"><span class="hist-val" style="text-align:left;flex:1;max-width:none">${e.val} ${e.unit}</span><button class="log-del" onclick="delHistWeight(${e._idx})">x</button></div>`).join(''):'<div class="hist-empty">Sin peso</div>';
-    return `<div class="hist-section">${histHead('Peso',alt,'weight',true)}${list}<div class="weight-row" style="margin-top:14px"><input type="number" id="hist-weight-input" placeholder="Peso" step="0.1"><select id="hist-weight-unit"><option>lbs</option><option>kg</option></select><button onclick="addHistWeight()">+</button></div><div class="hist-edit-actions"><button class="hist-cancel-btn" onclick="cancelHist('weight')">Cerrar</button></div></div>`;
+    return `<div class="hist-section">${histHead('Peso',alt,'weight',true)}${list}<div class="hist-form-date-label" style="margin-top:14px">Agregando a <b>${date}</b></div><div class="weight-row" style="margin-top:6px"><input type="number" id="hist-weight-input" placeholder="Peso" step="0.1"><select id="hist-weight-unit"><option>lbs</option><option>kg</option></select><button onclick="addHistWeight()">+</button></div><div class="hist-edit-actions"><button class="hist-cancel-btn" onclick="cancelHist('weight')">Cerrar</button></div></div>`;
   }
   let body=entries.length?entries.map(e=>`<div class="hist-row"><span class="hist-label">Peso registrado</span><span class="hist-val">${e.val} ${e.unit}</span></div>`).join(''):'<div class="hist-empty">Sin peso registrado</div>';
   return `<div class="hist-section">${histHead('Peso',alt,'weight',false)}${body}</div>`;
