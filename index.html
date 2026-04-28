@@ -195,7 +195,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 </div>
 <script>
-const TODAY=new Date().toISOString().split('T')[0];
+function localDate(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+const TODAY=localDate();
 const MACROS=[
   {key:'cal',name:'Calorías',max:1910,unit:'kcal',color:'#378ADD'},
   {key:'pro',name:'Proteína',max:140,unit:'g',color:'#1D9E75'},
@@ -212,7 +213,6 @@ const SUPS=[
     {key:'ashA',name:'Ashwagandha Orgánica',detail:'1 cápsula (700mg) · dosis AM'}
   ]},
   {moment:'Con almuerzo',items:[
-    {key:'om3b',name:'Omega-3 Triple Strength',detail:'2 cápsulas · dosis PM'},
     {key:'vitc',name:'Vitamina C',detail:'1 cápsula (1,000mg)'},
     {key:'ashB',name:'Ashwagandha Orgánica',detail:'1 cápsula (700mg) · dosis PM'}
   ]},
@@ -301,7 +301,7 @@ function buildMacros(){
     div.className='macro-row';
     div.innerHTML=`<div class="macro-header"><span class="macro-name">${m.name}</span><span class="macro-nums" id="mnum-${m.key}">0 / ${m.max} ${m.unit}</span></div>
     <div class="macro-bar-bg"><div class="macro-bar-fill" id="mbar-${m.key}" style="width:0%;background:${m.color}"></div></div>
-    <div class="macro-input-row"><input type="number" id="minp-${m.key}" placeholder="Consumido hoy" min="0" inputmode="numeric" oninput="updateMacro('${m.key}',${m.max},'${m.unit}')"><span>/ ${m.max} ${m.unit}</span></div>`;
+    <div class="macro-input-row"><input type="text" inputmode="decimal" id="minp-${m.key}" placeholder="Consumido hoy" oninput="updateMacro('${m.key}',${m.max},'${m.unit}')"><span>/ ${m.max} ${m.unit}</span></div>`;
     c.appendChild(div);
   });
 }
@@ -318,7 +318,8 @@ function initMacros(){
 function renderMacro(key,val,max,unit){
   const pct=Math.min(100,Math.round(val/max*100));
   document.getElementById('mbar-'+key).style.width=pct+'%';
-  document.getElementById('mnum-'+key).textContent=Math.round(val)+' / '+max+' '+unit;
+  const display=Number.isInteger(val)?val:(Math.round(val*10)/10);
+  document.getElementById('mnum-'+key).textContent=display+' / '+max+' '+unit;
 }
 function updateMacro(key,max,unit){
   const val=parseFloat(document.getElementById('minp-'+key).value)||0;
@@ -382,18 +383,53 @@ function renderLog(type){
   c.innerHTML=d.slice().reverse().slice(0,10).map((e,ri)=>{
     const realIdx=d.length-1-ri;
     return `<div class="log-entry">
-      <div class="log-entry-left">${e.type}</div>
+      <div class="log-entry-left">${e.type}${e.cal?' <span style="color:#EF9F27;font-size:11px">~${e.cal} kcal</span>':''}</div>
       <div class="log-entry-right">${e.date}${e.dur?' · '+e.dur:''}<button class="log-del" onclick="delLog('${type}',${realIdx})">x</button></div>
     </div>`;
   }).join('');
+}
+function parseDurMins(s){
+  if(!s)return null;
+  s=s.toLowerCase().trim();
+  let m=s.match(/(\d+\.?\d*)\s*h(?:ora)?s?\s*(\d+)?/);
+  if(m)return parseFloat(m[1])*60+(parseInt(m[2])||0);
+  m=s.match(/(\d+):(\d+)/);
+  if(m)return parseInt(m[1])*60+parseInt(m[2]);
+  m=s.match(/(\d+\.?\d*)\s*min/);
+  if(m)return parseFloat(m[1]);
+  m=s.match(/^(\d+\.?\d*)$/);
+  if(m)return parseFloat(m[1]);
+  return null;
+}
+function getMET(name){
+  const n=name.toLowerCase();
+  if(/f[uú]tb|soccer|futsal/.test(n))return 8;
+  if(/corr|run|jog|trotar/.test(n))return 9;
+  if(/natac|swim|piscina/.test(n))return 7;
+  if(/hiit|circuito|circuit/.test(n))return 8;
+  if(/bici|cicl|bike/.test(n))return 6;
+  if(/caminat|walk|caminar/.test(n))return 3.5;
+  if(/pesas|gym|d[ií]a [abc]|upper|lower|press|remo|squat/.test(n))return 4;
+  return 4;
+}
+function estCalories(name,durStr){
+  const mins=parseDurMins(durStr);
+  if(!mins)return null;
+  const wlog=lsGet('weight_log')||[];
+  if(!wlog.length)return null;
+  const last=wlog[wlog.length-1];
+  const kg=last.unit==='lbs'?parseFloat(last.val)*0.453592:parseFloat(last.val);
+  if(!kg)return null;
+  return Math.round(getMET(name)*kg*(mins/60));
 }
 function addLog(type){
   const date=document.getElementById(type+'-date').value||TODAY;
   const t=document.getElementById(type+'-type').value.trim();
   const dur=document.getElementById(type+'-dur').value.trim();
   if(!t)return;
+  const cal=estCalories(t,dur);
   const d=lsGet('log_'+type)||[];
-  d.push({date,type:t,dur});
+  d.push({date,type:t,dur,cal});
   lsSave('log_'+type,d);
   document.getElementById(type+'-type').value='';
   document.getElementById(type+'-dur').value='';
@@ -438,7 +474,7 @@ function loadHistorial(){
   const hasMacros=MACROS.some(m=>macros[m.key]>0);
   html+=`<div class="hist-section"><div class="hist-section-title">Macros</div>`;
   if(!hasMacros){html+='<div class="hist-empty">Sin macros registrados</div>';}
-  else{MACQOS.forEach(m=>{const val=macros[m.key]||0;const pct=Math.min(100,Math.round(val/m.max*100));html+=`<div class="hist-row"><span class="hist-label">${m.name}</span><span class="hist-val">${Math.round(val)} / ${m.max} ${m.unit} (${pct}%)</span></div>`;});}
+  else{MACROS.forEach(m=>{const val=macros[m.key]||0;const pct=Math.min(100,Math.round(val/m.max*100));html+=`<div class="hist-row"><span class="hist-label">${m.name}</span><span class="hist-val">${Math.round(val)} / ${m.max} ${m.unit} (${pct}%)</span></div>`;});}
   html+='</div>';
   const sups=lsGet('sups_'+date)||{};
   const checkedCount=ALL_SUPS.filter(s=>sups[s.key]).length;
